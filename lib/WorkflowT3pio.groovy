@@ -15,8 +15,10 @@ class WorkflowT3pio {
         genomeExistsError(params, log)
 
 
-        if (!params.fasta) {
-            Nextflow.error "Genome fasta file not specified with e.g. '--fasta genome.fa' or via a detectable config file."
+        if (params.fasta) {
+            log.info "Using FASTA file: ${params.fasta}"
+        } else {
+            log.info "No FASTA file specified. The pipeline will run without a reference genome."
         }
     }
 

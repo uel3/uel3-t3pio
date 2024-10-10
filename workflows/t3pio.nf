@@ -35,7 +35,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK } from '../subworkflows/local/input_check'
+//include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -46,10 +46,21 @@ include { INPUT_CHECK } from '../subworkflows/local/input_check'
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { FASTQC                      } from '../modules/nf-core/fastqc/main'
+//include { FASTQC                      } from '../modules/nf-core/fastqc/main'
+
+
+// Import modules
+include { PARSE_GENBANK  } from '../modules/local/parsegbk'
+//include { COMBINE_FAA_FILES } from '../modules/local/combinefaa'
+include { ORTHOFINDER } from '../modules/nf-core/orthofinder'
+include { PARSE_ORTHOFINDER } from '../modules/local/orthofinderparser'
+//include { ORTHOFINDER_CLASS_CHECK } from '../modules/local/orthofinderclasscheck'
+include { ORTHOFINDER_PARING } from '../modules/local/orthofinderparing'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
+//Import subworkflows
+include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrouplist'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -58,7 +69,9 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 
 // Info required for completion email and summary
 def multiqc_report = []
+// Define input parameters
 
+// Validate inputs
 workflow T3PIO {
 
     ch_versions = Channel.empty()
@@ -66,26 +79,47 @@ workflow T3PIO {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
-    INPUT_CHECK (
-        file(params.input)
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+
+    // Create a channel with all GenBank files in the specified directory
+    gbk_files_ch = Channel.fromPath("${params.input}/*.gbk")
+        .ifEmpty { error "No GenBank files found in ${params.input}" }
+    //gbk_files_ch.view { "Input GenBank file: $it" }
+    // Run the PARSE_GENBANK process for each file
+    PARSE_GENBANK(gbk_files_ch)
+        // Format the output for ORTHOFINDER
+    // Collect all .faa files into a single list
+    all_faa_files = PARSE_GENBANK.out.faa_files.collect()
+
+    // Run ORTHOFINDER only after all .faa files are processed
+    ORTHOFINDER(all_faa_files)
+    ch_versions = ch_versions.mix(ORTHOFINDER.out.versions)
+    
+    PARSE_ORTHOFINDER(ORTHOFINDER.out.orthogroups)
+    ch_versions = ch_versions.mix(ORTHOFINDER.out.versions)
+
+    ORTHOGROUP_LIST_PASS_FAIL(PARSE_ORTHOFINDER.out.orthogroup_results_list)
+
+    ORTHOGROUP_LIST_PASS_FAIL.out.check_result
+        .ifEmpty { error "Orthogroup objects check produced no output" }
+        .map { passed, message ->
+            log.info(message)
+            if (!passed) {
+                error(message)
+            }
+            return "Orthogroup check passed. Proceeding with workflow."
+        }
+        .set { proceed_signal }
+    ORTHOFINDER_PARING(PARSE_ORTHOFINDER.out.orthogroup_results_list)
+    ch_versions = ch_versions.mix(ORTHOFINDER_PARING.out.versions)
+
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
 
-    //
-    // MODULE: Run FastQC
-    //
-    FASTQC (
-        INPUT_CHECK.out.reads
-    )
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
-
     //
     // MODULE: MultiQC
     //
@@ -99,8 +133,7 @@ workflow T3PIO {
     ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
     ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
-
+    
     MULTIQC (
         ch_multiqc_files.collect(),
         ch_multiqc_config.toList(),

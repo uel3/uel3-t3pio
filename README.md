@@ -9,7 +9,7 @@
 
 ## Introduction
 
-**uel3/t3pio** is a bioinformatics pipeline that ...
+**uel3/t3pio** is a bioinformatics pipeline that identifies MLST primers from ortho groups
 
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
@@ -21,8 +21,9 @@
      workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
-1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+1. OrthoFinder
+2. Primer3
+3. BLAST+
 
 ## Usage
 
@@ -62,7 +63,7 @@ nextflow run uel3/t3pio \
 
 ## Credits
 
-uel3/t3pio was originally written by Candace Cole.
+uel3/t3pio was originally written by AJ Williams-Newkirk, S Lucking, R Jin, and adapted to nextflow by C Cole. 
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
