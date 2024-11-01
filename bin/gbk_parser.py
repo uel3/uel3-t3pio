@@ -5,12 +5,11 @@ import argparse
 import glob
 import sys
 from Bio import SeqIO
-
 def gbk_parser(gbk_file, out_faa, out_json):
     nucleotide_dictionary = {}
-    
+   
     sample_name = os.path.splitext(os.path.basename(gbk_file))[0]
-    
+   
     with open(gbk_file, 'r') as infile, open(out_faa, 'w') as faa_out:
         feature_count = 0
         for record in SeqIO.parse(infile, 'genbank'):
@@ -29,18 +28,15 @@ def gbk_parser(gbk_file, out_faa, out_json):
    
     with open(out_json, 'w') as json_out:
         json.dump(nucleotide_dictionary, json_out)
-
     print(f"Successfully processed {gbk_file}")
     print(f"FAA output: {out_faa}")
     print(f"JSON output: {out_json}")
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse GenBank file and extract protein and nucleotide sequences.")
     parser.add_argument("--input", required=True, help="Input GenBank file")
     parser.add_argument("--output_faa", required=True, help="Output FAA file")
     parser.add_argument("--output_json", required=True, help="Output JSON file for nucleotide sequences")
     args = parser.parse_args()
-
     try:
         gbk_parser(args.input, args.output_faa, args.output_json)
         print("Processing complete.")

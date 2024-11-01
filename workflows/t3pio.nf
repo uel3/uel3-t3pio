@@ -56,6 +56,9 @@ include { ORTHOFINDER } from '../modules/nf-core/orthofinder'
 include { PARSE_ORTHOFINDER } from '../modules/local/orthofinderparser'
 //include { ORTHOFINDER_CLASS_CHECK } from '../modules/local/orthofinderclasscheck'
 include { ORTHOFINDER_PARING } from '../modules/local/orthofinderparing'
+include { COMBINE_JSON } from '../modules/local/combineparsedjson'
+include { MULTIFASTA_GENERATOR } from '../modules/local/multifastagenerator'
+include { MUSCLE }               from '../modules/nf-core/muscle'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -83,12 +86,17 @@ workflow T3PIO {
     // Create a channel with all GenBank files in the specified directory
     gbk_files_ch = Channel.fromPath("${params.input}/*.gbk")
         .ifEmpty { error "No GenBank files found in ${params.input}" }
-    //gbk_files_ch.view { "Input GenBank file: $it" }
+    
     // Run the PARSE_GENBANK process for each file
     PARSE_GENBANK(gbk_files_ch)
-        // Format the output for ORTHOFINDER
-    // Collect all .faa files into a single list
+    // Format the output for ORTHOFINDER
+    // Collect all .faa and .json files into a single list
     all_faa_files = PARSE_GENBANK.out.faa_files.collect()
+    // Collect all individual JSON files
+    nucleotide_files_ch = PARSE_GENBANK.out.nucleotide_files.collect()
+
+    // Combine all JSON files
+    COMBINE_JSON(nucleotide_files_ch)
 
     // Run ORTHOFINDER only after all .faa files are processed
     ORTHOFINDER(all_faa_files)
@@ -111,7 +119,10 @@ workflow T3PIO {
         .set { proceed_signal }
     ORTHOFINDER_PARING(PARSE_ORTHOFINDER.out.orthogroup_results_list)
     ch_versions = ch_versions.mix(ORTHOFINDER_PARING.out.versions)
-
+    MULTIFASTA_GENERATOR(ORTHOFINDER_PARING.out.pared_orthogroups,COMBINE_JSON.out.nucleotide_dict)
+    ch_versions = ch_versions.mix(MULTIFASTA_GENERATOR.out.versions)
+    MUSCLE{MULTIFASTA_GENERATOR.out.multifasta.flatten()}
+    ch_versions = ch_versions.mix(MUSCLE.out.versions)
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
