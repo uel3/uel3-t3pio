@@ -22,8 +22,11 @@
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
 1. OrthoFinder
-2. Primer3
-3. BLAST+
+2. MUSCLE
+3. EMBOSS consambig
+4. Primer3
+5. EMBOSS primersearch
+
 
 ## Usage
 
