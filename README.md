@@ -53,7 +53,7 @@ Now, you can run the pipeline using:
 ```bash
 nextflow run uel3/t3pio \
    -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
+   --input <path/to/gbk/files> \
    --outdir <OUTDIR>
 ```
 
