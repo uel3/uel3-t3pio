@@ -6,8 +6,9 @@ import glob
 import sys
 from Bio import SeqIO
 def gbk_parser(gbk_file, out_faa, out_json):
+    #initialize dictionary for nucleotide seqeunces
     nucleotide_dictionary = {}
-   
+    #extract sample name from input file path 
     sample_name = os.path.splitext(os.path.basename(gbk_file))[0]
    
     with open(gbk_file, 'r') as infile, open(out_faa, 'w') as faa_out:
