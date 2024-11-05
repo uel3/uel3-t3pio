@@ -42,9 +42,10 @@ def main():
         with open(output_file, 'w') as f:
             for sequence in seq_names:
                 # Try both with and without ">" prefix
+                strain_name = sequence.split('.')[0]
                 sequence_key = f">{sequence}"
                 if sequence_key in nucleotide_dict:
-                    f.write(f">{sequence}\n")
+                    f.write(f">{strain_name}\n")
                     f.write(f"{nucleotide_dict[sequence_key]}\n")
                 else:
                     print(f"Warning: Sequence {sequence} not found in nucleotide data", file=sys.stderr)
