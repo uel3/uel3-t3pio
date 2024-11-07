@@ -86,7 +86,15 @@ workflow T3PIO {
     // Create a channel with all GenBank files in the specified directory
     gbk_files_ch = Channel.fromPath("${params.input}/*.gbk")
         .ifEmpty { error "No GenBank files found in ${params.input}" }
-    
+    // Collect all files to count them before proceeding
+    gbk_files_ch.collect().map { files ->
+        // Check if number of files matches number_isolates param
+        if (files.size() != params.number_isolates) {
+            error "Found ${files.size()} GenBank files but expected ${params.number_isolates} based on your config. Please check your input directory or update number_isolates parameter."
+        }
+        return files
+    }.flatten()
+    .set { verified_gbk_files_ch }
     // Run the PARSE_GENBANK process for each file
     PARSE_GENBANK(gbk_files_ch)
     // Format the output for ORTHOFINDER
