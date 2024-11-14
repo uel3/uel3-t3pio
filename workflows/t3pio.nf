@@ -129,7 +129,7 @@ workflow T3PIO {
     ch_versions = ch_versions.mix(ORTHOFINDER_PARING.out.versions)
     MULTIFASTA_GENERATOR(ORTHOFINDER_PARING.out.pared_orthogroups,COMBINE_JSON.out.nucleotide_dict)
     ch_versions = ch_versions.mix(MULTIFASTA_GENERATOR.out.versions)
-    MUSCLE{MULTIFASTA_GENERATOR.out.multifasta.flatten()}
+    MUSCLE(MULTIFASTA_GENERATOR.out.multifasta.flatten())
     ch_versions = ch_versions.mix(MUSCLE.out.versions)
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
