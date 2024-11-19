@@ -7,3 +7,4 @@ testing/
 testing*
 *.pyc
 README2.md
+cdc-dev.config
