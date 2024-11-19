@@ -1,5 +1,5 @@
 process PARSE_GENBANK {
-    conda 'bioconda::biopython=1.78 python=3.9'
+    conda 'conda-forge::biopython=1.78 python=3.9'
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.78' :
         'quay.io/biocontainers/biopython:1.78' }"
