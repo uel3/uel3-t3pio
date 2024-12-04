@@ -132,7 +132,7 @@ workflow T3PIO {
     ch_versions = ch_versions.mix(MULTIFASTA_GENERATOR.out.versions)
     MUSCLE(MULTIFASTA_GENERATOR.out.multifasta.flatten())
     ch_versions = ch_versions.mix(MUSCLE.out.versions)
-    TRIMAL(MUSCLE.out.muscle_files)
+    TRIMAL(MUSCLE.out.muscle_files) //using trimAl 1.2
     ch_versions = ch_versions.mix(TRIMAL.out.versions)
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
