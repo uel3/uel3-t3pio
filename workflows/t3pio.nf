@@ -61,6 +61,9 @@ include { MULTIFASTA_GENERATOR } from '../modules/local/multifastagenerator'
 include { MUSCLE }               from '../modules/nf-core/muscle'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { PRIMER3 } from '../modules/local/primer3'
+include { BOULDER } from '../modules/local/boulder'
+include { PARSE_PRIMER3 } from '../modules/local/parse_primer3'
 
 //Import subworkflows
 include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrouplist'
@@ -135,6 +138,11 @@ workflow T3PIO {
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
 
+    // THIS IS TEMPORARY. These consambig.fa files need to be passed down from upstream consambig process 
+    Channel.fromPath("${params.primer3_input}/*.fa", checkIfExists: true).set { primer3_input_ch }
+    BOULDER(primer3_input_ch)
+    PRIMER3(BOULDER.out.boulder_output)
+    PARSE_PRIMER3(PRIMER3.out.primer3_output)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
