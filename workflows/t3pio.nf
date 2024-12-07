@@ -64,6 +64,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 include { PRIMER3 } from '../modules/local/primer3'
 include { BOULDER } from '../modules/local/boulder'
 include { PARSE_PRIMER3 } from '../modules/local/parse_primer3'
+include { PRIMERSEARCH } from '../modules/local/primersearch'
 
 //Import subworkflows
 include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrouplist'
@@ -143,6 +144,23 @@ workflow T3PIO {
     BOULDER(primer3_input_ch)
     PRIMER3(BOULDER.out.boulder_output)
     PARSE_PRIMER3(PRIMER3.out.primer3_output)
+
+    // THIS IS TEMPORARY. trimal files need to be passed from upstream
+    Channel.fromPath("${params.primer3_input}/*.trimAl", checkIfExists: true).set { trimal_input_ch }
+    trimal_input_ch
+    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    .set { keyedTrimalFiles }
+
+    PARSE_PRIMER3.out.primer_output
+    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    .set { keyedPrimerFiles }
+
+    keyedTrimalFiles
+    .join(keyedPrimerFiles)
+    .map { id, trimal, primers -> tuple(trimal, primers) }
+    .set { pairedFiles }
+
+    PRIMERSEARCH(pairedFiles)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
