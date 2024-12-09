@@ -65,6 +65,7 @@ include { PRIMER3 } from '../modules/local/primer3'
 include { BOULDER } from '../modules/local/boulder'
 include { PARSE_PRIMER3 } from '../modules/local/parse_primer3'
 include { PRIMERSEARCH } from '../modules/local/primersearch'
+include { PARSE_PRIMERSEARCH } from '../modules/local/parse_primersearch'
 
 //Import subworkflows
 include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrouplist'
@@ -161,6 +162,26 @@ workflow T3PIO {
     .set { pairedFiles }
 
     PRIMERSEARCH(pairedFiles)
+
+    // join 3 channels into input for PARSE_PRIMERSEARCH
+    PRIMER3.out.primer3_output
+    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    .set { keyedPrimer3output_ch }
+
+    keyedPrimer3output_ch
+    .join(keyedTrimalFiles)
+    .set { pairedFiles_primer3_trimal_ch }
+
+    PRIMERSEARCH.out.search_output
+    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    .set { keyedPrimersearch_output_ch }
+
+    pairedFiles_primer3_trimal_ch
+    .join(keyedPrimersearch_output_ch)
+    .map { key, primer3, trimal, ps -> tuple(primer3, trimal, ps) }
+    .set { pairedFiles_primer3_trimal_ps_ch }
+
+    PARSE_PRIMERSEARCH(pairedFiles_primer3_trimal_ps_ch, params.number_isolates)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')

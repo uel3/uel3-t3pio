@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 import argparse
 import json
-import subprocess
-from Bio import SeqIO
-import re
 
 class Orthogroup:
     """"Parsed orthogroup info
@@ -104,6 +101,10 @@ def primer3Parser(primer3_file):
                 clearedPrimers.append(primer)
                 break
 
+    return(clearedPrimers)
+
+#print out the cleared primers to a file with extension .Primers
+def print_primers(primer3_file, clearedPrimers):
 
     primerFileList = []
     for primers in clearedPrimers: #primerPairObjectList: 
@@ -117,7 +118,6 @@ def primer3Parser(primer3_file):
             print(primers,file=f)
     f.close()
 
-    return(clearedPrimers)
 
 if __name__ == "__main__":
 
@@ -125,4 +125,4 @@ if __name__ == "__main__":
     parser.add_argument("--primer3_file", required=True, help="Input primer3 file")
     args = parser.parse_args()
 
-    primer3Parser(args.primer3_file)
+    print_primers(args.primer3_file, primer3Parser(args.primer3_file))
