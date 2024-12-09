@@ -60,6 +60,7 @@ include { COMBINE_JSON                } from '../modules/local/combineparsedjson
 include { MULTIFASTA_GENERATOR        } from '../modules/local/multifastagenerator'
 include { MUSCLE                      } from '../modules/nf-core/muscle'
 include { TRIMAL                      } from '../modules/local/trimal'
+include { CONSAMBIG                   } from '../modules/local/embossconsambig'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -134,6 +135,8 @@ workflow T3PIO {
     ch_versions = ch_versions.mix(MUSCLE.out.versions)
     TRIMAL(MUSCLE.out.muscle_files) //using trimAl 1.2
     ch_versions = ch_versions.mix(TRIMAL.out.versions)
+    CONSAMBIG(TRIMAL.out.trimmed_alignment) //using emboss 6.6.0
+    ch_versions = ch_versions.mix(CONSAMBIG.out.versions)
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
