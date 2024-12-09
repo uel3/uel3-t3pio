@@ -50,15 +50,16 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 
 
 // Import modules
-include { PARSE_GENBANK  } from '../modules/local/parsegbk'
+include { PARSE_GENBANK               } from '../modules/local/parsegbk'
 //include { COMBINE_FAA_FILES } from '../modules/local/combinefaa'
-include { ORTHOFINDER } from '../modules/nf-core/orthofinder'
-include { PARSE_ORTHOFINDER } from '../modules/local/orthofinderparser'
+include { ORTHOFINDER                 } from '../modules/nf-core/orthofinder'
+include { PARSE_ORTHOFINDER           } from '../modules/local/orthofinderparser'
 //include { ORTHOFINDER_CLASS_CHECK } from '../modules/local/orthofinderclasscheck'
-include { ORTHOFINDER_PARING } from '../modules/local/orthofinderparing'
-include { COMBINE_JSON } from '../modules/local/combineparsedjson'
-include { MULTIFASTA_GENERATOR } from '../modules/local/multifastagenerator'
-include { MUSCLE }               from '../modules/nf-core/muscle'
+include { ORTHOFINDER_PARING          } from '../modules/local/orthofinderparing'
+include { COMBINE_JSON                } from '../modules/local/combineparsedjson'
+include { MULTIFASTA_GENERATOR        } from '../modules/local/multifastagenerator'
+include { MUSCLE                      } from '../modules/nf-core/muscle'
+include { TRIMAL                      } from '../modules/local/trimal'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
@@ -131,6 +132,8 @@ workflow T3PIO {
     ch_versions = ch_versions.mix(MULTIFASTA_GENERATOR.out.versions)
     MUSCLE(MULTIFASTA_GENERATOR.out.multifasta.flatten())
     ch_versions = ch_versions.mix(MUSCLE.out.versions)
+    TRIMAL(MUSCLE.out.muscle_files) //using trimAl 1.2
+    ch_versions = ch_versions.mix(TRIMAL.out.versions)
     // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
