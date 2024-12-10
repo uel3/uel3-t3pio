@@ -150,6 +150,7 @@ workflow T3PIO {
     Channel.fromPath("${params.primer3_input}/*.fa", checkIfExists: true).set { primer3_input_ch }
     BOULDER(primer3_input_ch)
     PRIMER3(BOULDER.out.boulder_output)
+    ch_versions = ch_versions.mix(PRIMER3.out.versions)
     PARSE_PRIMER3(PRIMER3.out.primer3_output)
 
     // THIS IS TEMPORARY. trimal files need to be passed from upstream
@@ -168,6 +169,7 @@ workflow T3PIO {
     .set { pairedFiles }
 
     PRIMERSEARCH(pairedFiles)
+    ch_versions = ch_versions.mix(PRIMERSEARCH.out.versions)
 
     // join 3 channels into input for PARSE_PRIMERSEARCH
     PRIMER3.out.primer3_output
