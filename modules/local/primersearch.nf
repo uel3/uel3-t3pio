@@ -1,9 +1,8 @@
 process PRIMERSEARCH {
-    conda 'bioconda::emboss==6.5.7'
+    conda 'bioconda::emboss==6.6.0'
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'docker://biocontainers/emboss:v6.5.7_cv2' : null}"    //6.6.0--h008e53c_10  6.6.0--h31157b7_10
-        // does not have nextflow required 'ps' installed 'docker://biocontainers/emboss:v6.6.0dfsg-7b1-deb_cv1'
-    // errorStrategy 'ignore'
+        'https://depot.galaxyproject.org/singularity/emboss:6.6.0--hf657eab_5':
+        'biocontainers/emboss:6.6.0--h440b012_4' }"
     tag "${trimalFile.baseName}"
     
     input:
@@ -29,12 +28,12 @@ process PRIMERSEARCH {
     fi
 
     
-    primersearch_version=$(primersearch --version)
+    primersearch_version=$((consambig --version 2>&1) | sed 's/EMBOSS://')
 
     # it doesn't print out version info correctly..  empty string for now
     cat <<-END_VERSIONS > versions.yml
     "!{task.process}":
-        primersearch: ${primersearch_version} 
+        emboss: ${primersearch_version} 
     END_VERSIONS
     '''
 
