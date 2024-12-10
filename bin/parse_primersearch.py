@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import argparse
+import re
 from Bio import SeqIO
 import parse_primer3 as pp3
+
 
 class PrimerSearchResults:
     
@@ -12,6 +14,23 @@ class PrimerSearchResults:
         self.leftHit = leftHit
         self.rightHit = rightHit
         self.sequence = sequence
+
+def calculate_length(sequence):
+    """
+    Calculate the length of a string where substrings enclosed in square brackets 
+    (e.g., [TCY]) are counted as a length of 1.
+
+    Args:
+        sequence (str): The input string.
+
+    Returns:
+        int: The calculated length.
+    """
+    # Use regex to find all substrings in square brackets and replace them with a single character
+    normalized_sequence = re.sub(r'\[.*?\]', 'X', sequence)
+    
+    # Return the length of the normalized sequence
+    return len(normalized_sequence)
 
 #########################################################
 #('Def') PrimersearchValidator() comments:
@@ -63,6 +82,15 @@ def PrimersearchValidator(ampliconInfo,numberIsolates):
 #####sequence 
 #Stores information in ('Object') ('PrimerSearchResults') for each isolate
 #Returns ('List') of ('PrimerSearchResults') ('Objects')
+# this is for parsing contents like the following: 
+# Primer name 2
+# Amplimer 1
+#         Sequence: Sal_JJP_36805
+#
+#         TGTTTGATGGG[TCY]AATGCGCAA hits forward strand at 340 with 0 mismatches
+#         GCTTTGCGCGCATGGATAATA hits reverse strand at [470] with 0 mismatches
+#         Amplimer length: 191 bp
+
 def PrimersearchComber(ampliconInfo,primer,sequenceRecordDict):
 
     primersearchObjects = []
@@ -73,14 +101,26 @@ def PrimersearchComber(ampliconInfo,primer,sequenceRecordDict):
             try: 
                 forwardHit = int(ampliconInfo[ampliconInfo.index(line)+3].split(' ')[5])
                 reverseHit = int((ampliconInfo[ampliconInfo.index(line)+4].split(' ')[5]).replace('[','').replace(']',''))
-                print(ampliconInfo[ampliconInfo.index(line)+1])
+                # print(ampliconInfo[ampliconInfo.index(line)+1])
                 ampliconLen = int(ampliconInfo[ampliconInfo.index(line)+5].split(' ')[2])
                 sequenceName = str(ampliconInfo[ampliconInfo.index(line)+1].split(' ')[1].strip(' ').strip('\n'))
 
                 sequence = str(sequenceRecordDict[sequenceName].seq)
                 sequence = (sequence.replace('-',''))
 
-                sequence = sequence[forwardHit+primer.leftLen:ampliconLen-reverseHit-primer.rightLen]
+                #this doesn't make sense, and probably is wrong!
+                #sequence = sequence[forwardHit+primer.leftLen:ampliconLen-reverseHit-primer.rightLen]
+
+                #this might not necessary be the 'forward primer', it is whatever the primer that hits the forward strand
+                #so is the 'reverse primer'
+                forwardHitPrimer = ampliconInfo[ampliconInfo.index(line)+3].split(' ')[0].strip()
+                reverseHitPrimer = ampliconInfo[ampliconInfo.index(line)+4].split(' ')[0].strip()
+                startIndex = forwardHit - 1  # primersearch results weren't zero-indexed
+                endIndex = startIndex + ampliconLen
+                # exclude primer sequences
+                startIndex = startIndex + calculate_length(forwardHitPrimer)
+                endIndex = endIndex - calculate_length(reverseHitPrimer)
+                sequence = sequence[startIndex:endIndex]
 
                 primersearchObject = PrimerSearchResults(primer,sequenceName,ampliconLen,forwardHit,reverseHit,sequence)
 
@@ -145,18 +185,17 @@ def PrimersearchParser(primersearchFile,numberIsolates,primerObjectList,trimalFi
 
     return(primersearchObjectList)
 
-#print out the cleared primers to a file with extension .Primers
-def print_primers(trimal_file, primersearchObjectList):
+#print out the amplicon sequences from primersearch results
+def print_amplicons(trimal_file, primersearchObjectList):
 
     primerFileList = []
     for pss in primersearchObjectList: #primerPairObjectList: 
         primerInfoList = []
-        primerInfoList.append(str(pss.primerInfo.orthogroupInfo.orthogroup)+'\t'+str(pss.primerInfo.number)+ \
-                              '\n'+str(pss.ampLen)+'\t'+str(pss.leftHit)+'\t'+str(pss.rightHit)+ \
-                                '\n'+pss.sequenceName+'\n'+pss.sequence)
+        amplicon_seq_ID = f">{str(pss.primerInfo.orthogroupInfo.orthogroup)}primerGroup{str(pss.primerInfo.number)}_{pss.sequenceName}"
+        primerInfoList.append(f"{amplicon_seq_ID}\n{pss.sequence}")
         primerFileList.append(primerInfoList)
 
-    f = open(trimal_file.split('.')[0]+'.Primers','w')
+    f = open(trimal_file.split('.')[0]+'.amplicon','w')
     for primerInfo in primerFileList:
         for primers in primerInfo:
             print(primers,file=f)
@@ -175,6 +214,6 @@ if __name__ == "__main__":
                                 args.number_isolates, \
                                 pp3.primer3Parser(args.primer3_file), \
                                 args.trimal_file)
-    print_primers(args.trimal_file, ps_list)
+    print_amplicons(args.trimal_file, ps_list)
     
     
