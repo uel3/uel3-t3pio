@@ -11,7 +11,7 @@ process PARSE_PRIMERSEARCH {
 
     output:
     path "*.boulder", emit: boulder_output, optional: true
-    path "*.Primers", emit: primer_output
+    path "*.amplicon", emit: amplicon_output
 
     // path "versions.yml", emit: versions
 
