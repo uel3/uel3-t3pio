@@ -63,6 +63,11 @@ include { TRIMAL                      } from '../modules/local/trimal'
 include { CONSAMBIG                   } from '../modules/local/embossconsambig'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
+include { PRIMER3 } from '../modules/local/primer3'
+include { BOULDER } from '../modules/local/boulder'
+include { PARSE_PRIMER3 } from '../modules/local/parse_primer3'
+include { PRIMERSEARCH } from '../modules/local/primersearch'
+include { PARSE_PRIMERSEARCH } from '../modules/local/parse_primersearch'
 
 //Import subworkflows
 include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrouplist'
@@ -141,6 +146,48 @@ workflow T3PIO {
     // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
     // ! There is currently no tooling to help you write a sample sheet schema
 
+    // THIS IS TEMPORARY. These consambig.fa files need to be passed down from upstream consambig process 
+    Channel.fromPath("${params.primer3_input}/*.fa", checkIfExists: true).set { primer3_input_ch }
+    BOULDER(primer3_input_ch)
+    PRIMER3(BOULDER.out.boulder_output)
+    PARSE_PRIMER3(PRIMER3.out.primer3_output)
+
+    // THIS IS TEMPORARY. trimal files need to be passed from upstream
+    Channel.fromPath("${params.primer3_input}/*.trimAl", checkIfExists: true).set { trimal_input_ch }
+    trimal_input_ch
+    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    .set { keyedTrimalFiles }
+
+    PARSE_PRIMER3.out.primer_output
+    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    .set { keyedPrimerFiles }
+
+    keyedTrimalFiles
+    .join(keyedPrimerFiles)
+    .map { id, trimal, primers -> tuple(trimal, primers) }
+    .set { pairedFiles }
+
+    PRIMERSEARCH(pairedFiles)
+
+    // join 3 channels into input for PARSE_PRIMERSEARCH
+    PRIMER3.out.primer3_output
+    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    .set { keyedPrimer3output_ch }
+
+    keyedPrimer3output_ch
+    .join(keyedTrimalFiles)
+    .set { pairedFiles_primer3_trimal_ch }
+
+    PRIMERSEARCH.out.search_output
+    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    .set { keyedPrimersearch_output_ch }
+
+    pairedFiles_primer3_trimal_ch
+    .join(keyedPrimersearch_output_ch)
+    .map { key, primer3, trimal, ps -> tuple(primer3, trimal, ps) }
+    .set { pairedFiles_primer3_trimal_ps_ch }
+
+    PARSE_PRIMERSEARCH(pairedFiles_primer3_trimal_ps_ch, params.number_isolates)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
