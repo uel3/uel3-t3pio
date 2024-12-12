@@ -13,7 +13,6 @@ process PARSE_PRIMERSEARCH {
     path "*.primer", emit: primer_output, optional: true
     path "*.amplicon", emit: amplicon_output
 
-
     // path "versions.yml", emit: versions
 
     shell:
