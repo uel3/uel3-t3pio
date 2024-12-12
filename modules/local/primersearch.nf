@@ -4,6 +4,8 @@ process PRIMERSEARCH {
         'https://depot.galaxyproject.org/singularity/emboss:6.6.0--hf657eab_5':
         'biocontainers/emboss:6.6.0--h440b012_4' }"
     tag "${trimalFile.baseName}"
+    errorStrategy "ignore"
+    
     
     input:
     tuple path(trimalFile), path(primersearchFile)
@@ -16,17 +18,14 @@ process PRIMERSEARCH {
     shell:
     '''
     # Run primersearch
-    primersearch -seqall !{trimalFile} \
-                 -infile !{primersearchFile} \
-                 -mismatchpercent 6 \
-                 -outfile !{trimalFile.baseName}.ps 2> primersearch_error.log
-
-    # Error handling
-    if [ $? -ne 0 ]; then
-        echo "Error: Primersearch failed for !{trimalFile.baseName}" >&2
-        exit 1
+    if [[ -s "!{trimalFile}" ]] && [[ -s "!{primersearchFile}" ]]; then
+        primersearch -seqall !{trimalFile} \
+                    -infile !{primersearchFile} \
+                    -mismatchpercent 6 \
+                    -outfile !{trimalFile.baseName}.ps
+    else
+        echo "Error: Primersearch failed for !{trimalFile.baseName}" >> primersearch_error.log
     fi
-
     
     primersearch_version=$((consambig --version 2>&1) | sed 's/EMBOSS://')
 
