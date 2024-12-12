@@ -201,6 +201,21 @@ def print_amplicons(trimal_file, primersearchObjectList):
             print(primers,file=f)
     f.close()
 
+#print out the primers from primersearch results
+#primers here are those have amplicons
+def print_primers(trimal_file, primersearchObjectList):
+
+    primerList = []
+    for pss in primersearchObjectList: #primerPairObjectList: 
+        # primerInfoList = []
+        primerInfo = f"primer\t{pss.primerInfo.leftSeq}\t{pss.primerInfo.rightSeq}\t{str(pss.primerInfo.orthogroupInfo.orthogroup)}primerGroup{str(pss.primerInfo.number)}"
+        primerList.append(primerInfo)
+        
+    f = open(trimal_file.split('.')[0]+'.primer','w')
+    for primerInfo in set(primerList):
+        print(primerInfo,file=f)
+    f.close()
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="parse primersearch outputs.")
@@ -215,5 +230,6 @@ if __name__ == "__main__":
                                 pp3.primer3Parser(args.primer3_file), \
                                 args.trimal_file)
     print_amplicons(args.trimal_file, ps_list)
+    print_primers(args.trimal_file, ps_list)
     
     

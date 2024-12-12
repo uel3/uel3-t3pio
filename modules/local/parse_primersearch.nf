@@ -10,7 +10,7 @@ process PARSE_PRIMERSEARCH {
     val (number_isolates)
 
     output:
-    path "*.boulder", emit: boulder_output, optional: true
+    path "*.primer", emit: primer_output, optional: true
     path "*.amplicon", emit: amplicon_output
 
     // path "versions.yml", emit: versions

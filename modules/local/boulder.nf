@@ -3,6 +3,8 @@ process BOULDER {
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/biopython:1.78' :
         'quay.io/biocontainers/biopython:1.78' }"
+    tag "${consambig.baseName}"
+    
     
     input:
     path consambig
@@ -14,7 +16,6 @@ process BOULDER {
 
     shell:
     '''
-    base_name=$(basename !{consambig} .fa)
     prepare_boulderfile.py --fa_file !{consambig} --boulder_file !{params.boulder_file} 
 
     #cat <<-END_VERSIONS > versions.yml

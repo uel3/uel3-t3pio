@@ -147,15 +147,21 @@ workflow T3PIO {
     // ! There is currently no tooling to help you write a sample sheet schema
 
     // THIS IS TEMPORARY. These consambig.fa files need to be passed down from upstream consambig process 
-    Channel.fromPath("${params.primer3_input}/*.fa", checkIfExists: true).set { primer3_input_ch }
-    BOULDER(primer3_input_ch)
+    //Channel.fromPath("${params.primer3_input}/*.fa", checkIfExists: true).set { primer3_input_ch }
+    //BOULDER(primer3_input_ch)
+    
+    BOULDER(CONSAMBIG.out.ambiguous_consensus)
     PRIMER3(BOULDER.out.boulder_output)
     ch_versions = ch_versions.mix(PRIMER3.out.versions)
     PARSE_PRIMER3(PRIMER3.out.primer3_output)
 
     // THIS IS TEMPORARY. trimal files need to be passed from upstream
-    Channel.fromPath("${params.primer3_input}/*.trimAl", checkIfExists: true).set { trimal_input_ch }
-    trimal_input_ch
+    // Channel.fromPath("${params.primer3_input}/*.trimAl", checkIfExists: true).set { trimal_input_ch }
+    // trimal_input_ch
+    // .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    // .set { keyedTrimalFiles }
+
+    TRIMAL.out.trimmed_alignment
     .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
     .set { keyedTrimalFiles }
 

@@ -3,6 +3,7 @@ process PRIMER3 {
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/primer3:2.6.0--pl5262h1b792b2_0' :
         'quay.io/biocontainers/primer3:2.6.0--pl5262h1b792b2_0' }"
+    tag "${boulder.baseName}"
     
     input:
     path boulder
