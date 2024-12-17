@@ -4,15 +4,18 @@ process ORTHOFINDER {
 
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/orthofinder:2.5.5--hdfd78af_2':
-        'biocontainers/orthofinder:2.5.5--hdfd78af_2' }"
+        // 'https://depot.galaxyproject.org/singularity/orthofinder:2.5.5--hdfd78af_2':
+        // 'biocontainers/orthofinder:2.5.5--hdfd78af_2' }"
+        'https://depot.galaxyproject.org/singularity/orthofinder%3A2.1.2--py27_0':
+        null }"
+
 
     input:
     path faa_files
 
     output:
     path "orthofinder_results", emit: orthofinder
-    path "orthofinder_results/Orthogroups/Orthogroups.txt", emit: orthogroups
+    path "orthofinder_results/Orthogroups.txt", emit: orthogroups
     path "versions.yml", emit: versions
 
     script:
@@ -32,7 +35,7 @@ process ORTHOFINDER {
         -n ${date}_orthofinder \\
         $args
     
-    mv faa_dir/OrthoFinder/Results_${date}_orthofinder/* orthofinder_results/
+    mv faa_dir/Results_${date}_orthofinder*/* orthofinder_results/
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
