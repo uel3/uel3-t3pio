@@ -68,6 +68,8 @@ include { BOULDER } from '../modules/local/boulder'
 include { PARSE_PRIMER3 } from '../modules/local/parse_primer3'
 include { PRIMERSEARCH } from '../modules/local/primersearch'
 include { PARSE_PRIMERSEARCH } from '../modules/local/parse_primersearch'
+include { CONCATENATE_PRIMERS } from '../modules/local/concatenateprimers'
+include { COMPARE_PRIMERS } from '../modules/local/comparelegacyprimers'
 
 //Import subworkflows
 include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrouplist'
@@ -196,7 +198,15 @@ workflow T3PIO {
     .set { pairedFiles_primer3_trimal_ps_ch }
 
     PARSE_PRIMERSEARCH(pairedFiles_primer3_trimal_ps_ch, params.number_isolates)
-
+    if (params.run_compare_primers) {
+        if (!params.legacy_file_path) {
+            error "Primer search is enabled but no search file provided. Please provide --search_file"
+        }
+        CONCATENATE_PRIMERS(PARSE_PRIMER3.out.primer_output.collect())
+        
+        reference = channel.fromPath(params.legacy_file_path)
+        COMPARE_PRIMERS(reference, CONCATENATE_PRIMERS.out.candidate_primers)
+    }
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
