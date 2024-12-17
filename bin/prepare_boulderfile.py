@@ -35,7 +35,7 @@ def BoulderIOParser(boulderFile):
 #####Captures stdout from primer3 and generates a ('Dictionary') ('primer3Dict')
 #Returns ('Dictionary') (dictionary[Orthogroup]:['Primer3',...,'Output'] as a json file
 # def RunPrimer3(consambigFile, primer3List, outputJsonFile):
-def prepare_boulder(consambigFile, primer3List):
+def prepare_boulder(consambigFile, primer3List, thermo):
     # Extract base filename for the Primer3 input file
     primer3BoulderFile = consambigFile.split('.')[0] + ".boulder"
     
@@ -49,6 +49,9 @@ def prepare_boulder(consambigFile, primer3List):
         
         print(orthogroup, file=f)
         print(consensusSeq, file=f)
+
+        thermo_setting = f"PRIMER_THERMODYNAMIC_PARAMETERS_PATH={thermo}"
+        print(thermo_setting, file=f)
         
         for i in primer3List:
             print(i, file=f)
@@ -76,6 +79,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="generate boulder file for primer3.")
     parser.add_argument("--fa_file", required=True, help="Input consambig.fa file")
     parser.add_argument("--boulder_file", required=True, help="Input boulder file template for primer3")
+    parser.add_argument("--thermo", required=True, help="thermodynamic settings for primer3")
     args = parser.parse_args()
 
-    prepare_boulder(args.fa_file, BoulderIOParser(args.boulder_file))
+    prepare_boulder(args.fa_file, BoulderIOParser(args.boulder_file), args.thermo)
