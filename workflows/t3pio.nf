@@ -202,8 +202,8 @@ workflow T3PIO {
         if (!params.legacy_file_path) {
             error "Primer search is enabled but no search file provided. Please provide --search_file"
         }
-        CONCATENATE_PRIMERS(PARSE_PRIMER3.out.primer_output.collect())
-        
+        //CONCATENATE_PRIMERS(PARSE_PRIMER3.out.primer_output.collect())
+        CONCATENATE_PRIMERS(PARSE_PRIMERSEARCH.out.primer_output.collect())
         reference = channel.fromPath(params.legacy_file_path)
         COMPARE_PRIMERS(reference, CONCATENATE_PRIMERS.out.candidate_primers)
     }
