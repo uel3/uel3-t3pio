@@ -30,6 +30,11 @@ def check_primer_match(ref_pair, search_pair):
         return True
     if (ref_rev1 == search_fwd1 and ref_fwd2 == search_fwd2):
         return True
+    # Check switched primers (forward and reverse swapped)
+    if (ref_fwd1 == search_fwd2 and ref_fwd2 == search_fwd1):
+        return True
+    if (ref_rev1 == search_fwd2 and ref_rev2 == search_fwd1):
+        return True
     
     return False
 
