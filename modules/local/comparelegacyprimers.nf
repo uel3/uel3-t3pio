@@ -9,18 +9,18 @@ process COMPARE_PRIMERS {
     path search
     
     output:
-    path "matches.txt", emit: matches
-    path "unmatched_ref.txt", emit: unmatched_ref
-    path "unmatched_search.txt", emit: unmatched_search
+    path "matches.txt", emit: reference_primer_matches
+    path "unmatched_ref.txt", emit: unmatched_reference_primers
+    path "unmatched_search.txt", emit: unmatched_search_file_primers
     
     script:
     """
     
-    compare_legacy_HMAS_RC.py \
+    compare_legacy_HMAS.py \
         --reference ${reference} \
         --search ${search} \
-        --matches matches.txt \
-        --unmatched-ref unmatched_ref.txt \
-        --unmatched-search unmatched_search.txt
+        --matches ${reference.baseName}_matches.txt \
+        --unmatched-ref ${reference.baseName}_unmatched.txt \
+        --unmatched-search ${search.baseName}_unmatched.txt
     """
 }

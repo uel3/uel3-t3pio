@@ -8,6 +8,6 @@ process CONCATENATE_PRIMERS {
 
     script:
     """
-    cat $parsed_primersearch_primers > concatenated_primers.txt
+    cat $parsed_primersearch_primers > concatenated_OGprimers.txt
     """
 }

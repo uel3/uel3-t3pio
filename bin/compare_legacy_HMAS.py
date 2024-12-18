@@ -4,7 +4,7 @@ import sys
 import os
 
 def reverse_complement(seq):
-    """Return the reverse complement of a DNA sequence"""
+    """Return the RC of a DNA sequence"""
     complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A',
                  'R': 'Y', 'Y': 'R', 'K': 'M', 'M': 'K',
                  'B': 'V', 'V': 'B', 'D': 'H', 'H': 'D',
@@ -14,7 +14,6 @@ def reverse_complement(seq):
 def check_primer_match(ref_pair, search_pair):
     """
     Check if primer pairs match in any orientation including reverse complements
-    Returns True if there's a match, False otherwise
     """
     ref_fwd1, ref_fwd2 = ref_pair
     ref_rev1, ref_rev2 = reverse_complement(ref_fwd1), reverse_complement(ref_fwd2)
@@ -31,15 +30,15 @@ def check_primer_match(ref_pair, search_pair):
         return True
     if (ref_rev1 == search_fwd1 and ref_fwd2 == search_fwd2):
         return True
+    # Check switched primers (forward and reverse swapped)
+    if (ref_fwd1 == search_fwd2 and ref_fwd2 == search_fwd1):
+        return True
+    if (ref_rev1 == search_fwd2 and ref_rev2 == search_fwd1):
+        return True
     
     return False
 
 def extract_and_search_primers(reference_file, search_file, matches_file, unmatched_ref_file, unmatched_search_file):
-    """
-    Extract primers and create output files for matches,
-    unmatched reference primers, and unmatched search lines.
-    Now includes reverse complement checking.
-    """
     # Ensure output directories exist
     for file_path in [matches_file, unmatched_ref_file, unmatched_search_file]:
         os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
