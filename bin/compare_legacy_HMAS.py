@@ -39,14 +39,11 @@ def check_primer_match(ref_pair, search_pair):
     return False
 
 def extract_and_search_primers(reference_file, search_file, matches_file, unmatched_ref_file, unmatched_search_file):
-    # Ensure output directories exist
     for file_path in [matches_file, unmatched_ref_file, unmatched_search_file]:
         os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
     
-    # Store primer pairs and their full lines from reference file
     primer_pairs = {}
     
-    # Read reference file
     with open(reference_file, 'r') as f:
         for line_num, line in enumerate(f, 1):
             cols = line.strip().split('\t')
@@ -58,7 +55,6 @@ def extract_and_search_primers(reference_file, search_file, matches_file, unmatc
     matched_lines = []
     unmatched_search_lines = []
     
-    # Search through search file
     with open(search_file, 'r') as f:
         for line_num, line in enumerate(f, 1):
             cols = line.strip().split('\t')
@@ -66,7 +62,6 @@ def extract_and_search_primers(reference_file, search_file, matches_file, unmatc
                 current_pair = (cols[1], cols[2])
                 found_match = False
                 
-                # Check against all reference pairs
                 for ref_pair in primer_pairs:
                     if check_primer_match(ref_pair, current_pair):
                         matched_pairs.add(ref_pair)
@@ -81,20 +76,17 @@ def extract_and_search_primers(reference_file, search_file, matches_file, unmatc
     unmatched_ref_primers = {pair: info for pair, info in primer_pairs.items()
                             if pair not in matched_pairs}
     
-    # Write matches to file
     with open(matches_file, 'w') as out:
         out.write(f"Found {len(primer_pairs)} primer pairs in reference file\n")
         out.write(f"Found {len(matched_lines)} matches:\n\n")
         for search_line_num, search_line, ref_line_num in matched_lines:
             out.write(f"Search Line {search_line_num} matches Reference Line {ref_line_num}: {search_line}\n")
     
-    # Write unmatched reference primers to file
     with open(unmatched_ref_file, 'w') as out:
         out.write(f"Found {len(unmatched_ref_primers)} unmatched reference primers:\n\n")
         for line_num, line in unmatched_ref_primers.values():
             out.write(f"Line {line_num}: {line}\n")
     
-    # Write unmatched search lines to file
     with open(unmatched_search_file, 'w') as out:
         out.write(f"Found {len(unmatched_search_lines)} unmatched search lines:\n\n")
         for line_num, line in unmatched_search_lines:
