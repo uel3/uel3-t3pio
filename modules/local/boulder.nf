@@ -16,7 +16,8 @@ process BOULDER {
 
     shell:
     '''
-    prepare_boulderfile.py --fa_file !{consambig} --boulder_file !{params.boulder_file} 
+    prepare_boulderfile.py --fa_file !{consambig} --boulder_file !{params.boulder_file} \
+                            --thermo !{params.boulder_file_thermoo}
 
     #cat <<-END_VERSIONS > versions.yml
     #"${task.process}":
