@@ -118,6 +118,20 @@ def print_primers(primer3_file, clearedPrimers):
             print(primers,file=f)
     f.close()
 
+    #print out primers in 'standard' oligo group format
+    full_primerFileList = []
+    orthogroup = primer3_file.split('.')[0]
+    for primers in clearedPrimers: #primerPairObjectList: 
+        full_primerInfoList = []
+        full_primerInfoList.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}")
+        full_primerFileList.append(full_primerInfoList)
+
+    f = open(primer3_file.split('.')[0]+'.Primers_full','w')
+    for primerInfo in full_primerFileList:
+        for primers in primerInfo:
+            print(primers,file=f)
+    f.close()
+
 
 if __name__ == "__main__":
 
