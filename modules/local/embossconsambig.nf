@@ -10,9 +10,10 @@ process CONSAMBIG {
     path "${trimmed_alignment.baseName}.fa", emit: ambiguous_consensus
     path "versions.yml", emit: versions
     
+    //consambig -sequence ${trimmed_alignment} -outseq ${trimmed_alignment.baseName}.fa -name ${trimmed_alignment.baseName} -snucleotide -sformat1 fasta -osformat2 fasta
     script:
     """
-    consambig -sequence ${trimmed_alignment} -outseq ${trimmed_alignment.baseName}.fa -name ${trimmed_alignment.baseName} -snucleotide -sformat1 fasta -osformat2 fasta
+    ${params.consambig_path} -sequence ${trimmed_alignment} -outseq ${trimmed_alignment.baseName}.fa -name ${trimmed_alignment.baseName} -snucleotide -sformat1 fasta -osformat2 fasta
     
 
     cat <<-END_VERSIONS > versions.yml
