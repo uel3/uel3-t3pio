@@ -11,6 +11,7 @@ process PARSE_PRIMER3 {
     output:
     path "*.boulder", emit: boulder_output, optional: true
     path "*.Primers", emit: primer_output, optional: true
+    path "*.Primers_full", emit: full_primer_output, optional: true
 
     // path "versions.yml", emit: versions
 
