@@ -7,5 +7,5 @@ testing/
 testing*
 *.pyc
 README2.md
-cdc-dev.config
 qsub_t3pio.sh
+cdc-dev.config

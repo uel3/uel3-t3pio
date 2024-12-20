@@ -9,8 +9,11 @@
 
 ## Introduction
 
-**uel3/t3pio** is a bioinformatics pipeline that identifies MLST primers from ortho groups
+**uel3/t3pio** is adapted from T3Pio which is an amplicon generation pipeline built for designing direct from stool amplicon sets for HMAS schemes
 
+## Description
+
+**uel3/t3pio** takes as input annotated genomes from the bacterial species of interest. Core genes from the species are identified and primers are designed to generate amplicons compatible with the user’s chosen HMAS platform. Current settings allow up to 3 degenerate bases per 180-250 bp primer.
 <!-- TODO nf-core:
    Complete this sentence with a 2-3 sentence summary of what types of data the pipeline ingests, a brief overview of the
    major pipeline sections and the types of output it produces. You're giving an overview to someone new
@@ -21,17 +24,26 @@
      workflows use the "tube map" design for that. See https://nf-co.re/docs/contributing/design_guidelines#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
-1. OrthoFinder
-2. MUSCLE
-3. EMBOSS consambig
-4. Primer3
-5. EMBOSS primersearch
+1. Python3 
+2. OrthoFinder (v2.1.2)
+3. MUSCLE (v3.8.1)
+4. TrimAl (v1.2)
+5. EMBOSS consambig (v.6.4.0)
+6. Primer3 (2.3.4)
+7. EMBOSS primersearch (v6.6.0)
 
 
 ## Usage
 
+Running T3pio requires Nextflow (>=21.10.3) and singulairity to be installed. There are detailed instructions below for Nextflow installation, including Nextflow's Bash and Java requirements. Currently, singularity is required for the orthofinder process therefore, we recommend using singualrity for all required dependencies.
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
+
+
+When Nextflow and conda are installed, clone the pipeline:
+'''bash
+git clone https://github.com/uel3/uel3-t3pio
+'''
 
 <!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
      Explain what rows and columns represent. For instance (please edit as appropriate):
@@ -59,6 +71,16 @@ nextflow run uel3/t3pio \
    --input <path/to/gbk/files> \
    --outdir <OUTDIR>
 ```
+To run, test against existing MLST primers, turn on the legacy_file_path process and provide the path to existing MLST primers file from the CLI or in the nextflow.config as legacy_file_path:
+
+```bash
+nextflow run uel3/t3pio \
+   -profile <docker/singularity/.../institute> \
+   --run_compare_primers true \
+   --legacy_file_path <path/to/existing/MLST/primers/file> \
+   --input <path/to/gbk/files> \
+   --outdir <OUTDIR>
+```
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
@@ -66,7 +88,7 @@ nextflow run uel3/t3pio \
 
 ## Credits
 
-uel3/t3pio was originally written by AJ Williams-Newkirk, S Lucking, R Jin, and adapted to nextflow by C Cole. 
+uel3/t3pio was originally written by AJ Williams-Newkirk, S Lucking, R Jin, and adapted to nextflow by C Cole and R Jin. 
 
 We thank the following people for their extensive assistance in the development of this pipeline:
 
