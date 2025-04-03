@@ -96,27 +96,44 @@ def primer3Parser(primer3_file):
     clearedPrimers = []
     for primer in primerPairObjectList:
         sequence = primer.orthogroupInfo.sequence[(primer.leftHit+primer.leftLen)-1:(primer.rightHit)-1]
-        for letter in sequence:
-            if letter not in ('ATGCN'):
+
+        if 'N' not in primer.leftSeq and 'N' not in primer.rightSeq:
+            if any(letter not in "ATGCN" for letter in sequence):
                 clearedPrimers.append(primer)
-                break
+                continue
+
+            #check for single base 'N'
+            def check_isolated_N(string):
+                # Handle the case where the string has only one character
+                if len(string) == 1:
+                    return string == 'N'  # Return True if it's 'N', False otherwise
+                
+                # Iterate through the string and check each 'N'
+                for i in range(1, len(string) - 1):
+                    if string[i] == 'N':
+                        if string[i - 1] != 'N' and string[i + 1] != 'N':
+                            return True  # Found an isolated 'N'
+                return False
+
+            if check_isolated_N(sequence):
+                clearedPrimers.append(primer)
 
     return(clearedPrimers)
 
 #print out the cleared primers to a file with extension .Primers
 def print_primers(primer3_file, clearedPrimers):
 
-    primerFileList = []
-    for primers in clearedPrimers: #primerPairObjectList: 
-        primerInfoList = []
-        primerInfoList.append(str(primers.number)+'\t'+primers.leftSeq+'\t'+primers.rightSeq)
-        primerFileList.append(primerInfoList)
+    # primerFileList = []
+    # for primers in clearedPrimers: #primerPairObjectList: 
+    #     primerInfoList = []
+    #     primerInfoList.append(str(primers.number)+'\t'+primers.leftSeq+'\t'+primers.rightSeq)
+    #     primerFileList.append(primerInfoList)
 
-    f = open(primer3_file.split('.')[0]+'.Primers','w')
-    for primerInfo in primerFileList:
-        for primers in primerInfo:
-            print(primers,file=f)
-    f.close()
+    # f = open(primer3_file.split('.')[0]+'.Primers','w')
+    # for primerInfo in primerFileList:
+    #     for primers in primerInfo:
+    #         print(primers,file=f)
+    # f.close()
 
     #print out primers in 'standard' oligo group format
     full_primerFileList = []
@@ -126,7 +143,7 @@ def print_primers(primer3_file, clearedPrimers):
         full_primerInfoList.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}")
         full_primerFileList.append(full_primerInfoList)
 
-    f = open(primer3_file.split('.')[0]+'.Primers_full','w')
+    f = open(primer3_file.split('.')[0]+'.Primers','w')
     for primerInfo in full_primerFileList:
         for primers in primerInfo:
             print(primers,file=f)
