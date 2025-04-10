@@ -103,7 +103,7 @@ def main(args):
         # fh.write("\n".join([p for res in results for p in res[0]]))
         # remove duplicates, and keep original orders
         fh.write("\n".join(list(dict.fromkeys(p for p in bad_primers))))
-        fh.write("\n".join(list(dict.fromkeys(p for p in off_target_large))))
+        # fh.write("\n".join(list(dict.fromkeys(p for p in off_target_large))))
 
 
 if __name__ == "__main__":
