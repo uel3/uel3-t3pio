@@ -70,6 +70,8 @@ include { PRIMERSEARCH } from '../modules/local/primersearch'
 include { PARSE_PRIMERSEARCH } from '../modules/local/parse_primersearch'
 include { CONCATENATE_PRIMERS } from '../modules/local/concatenateprimers'
 include { COMPARE_PRIMERS } from '../modules/local/comparelegacyprimers'
+include { CONCATENATE_GOOD_PRIMERS } from '../modules/local/concatenate_good_primers'
+include { SNP_REDUNDANCY_FILTER } from '../modules/local/snp_redundancy_filter'
 
 //Import subworkflows
 include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrouplist'
@@ -91,6 +93,13 @@ workflow T3PIO {
     //
     // SUBWORKFLOW: Read in samplesheet, validate and stage input files
     //
+
+    // Channel.fromPath("${params.contig_file}/*")
+    // .filter { it.name.endsWith('.fna') || it.name.endsWith('.fasta') }
+    // .set { stool_contigs_ch }
+
+    stool_contigs_ch = Channel.fromPath("${params.contig_file}/*.fna")
+    stool_good_contig_list_ch = Channel.fromPath("${params.good_contig_list}")
 
     // Create a channel with all GenBank files in the specified directory
     gbk_files_ch = Channel.fromPath("${params.input}/*.gbk")
@@ -157,56 +166,75 @@ workflow T3PIO {
     ch_versions = ch_versions.mix(PRIMER3.out.versions)
     PARSE_PRIMER3(PRIMER3.out.primer3_output)
 
+    //concatenate all primers into a single file
+    all_primers_ch = PARSE_PRIMER3.out.primer_output.collect()
+    CONCATENATE_PRIMERS(all_primers_ch)
+    //     reference = channel.fromPath(params.legacy_file_path)
+    //     COMPARE_PRIMERS(reference, CONCATENATE_PRIMERS.out.candidate_primers)
+
     // THIS IS TEMPORARY. trimal files need to be passed from upstream
     // Channel.fromPath("${params.primer3_input}/*.trimAl", checkIfExists: true).set { trimal_input_ch }
     // trimal_input_ch
     // .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
     // .set { keyedTrimalFiles }
 
-    TRIMAL.out.trimmed_alignment
-    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
-    .set { keyedTrimalFiles }
+    // TRIMAL.out.trimmed_alignment
+    // .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    // .set { keyedTrimalFiles }
 
-    PARSE_PRIMER3.out.primer_output
-    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
-    .set { keyedPrimerFiles }
+    // PARSE_PRIMER3.out.primer_output
+    // .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    // .set { keyedPrimerFiles }
 
-    keyedTrimalFiles
-    .join(keyedPrimerFiles)
-    .map { id, trimal, primers -> tuple(trimal, primers) }
-    .set { pairedFiles }
+    // keyedTrimalFiles
+    // .join(keyedPrimerFiles)
+    // .map { id, trimal, primers -> tuple(trimal, primers) }
+    // .set { pairedFiles }
 
-    PRIMERSEARCH(pairedFiles)
+    // PRIMERSEARCH(pairedFiles)
+    stool_contigs_ch
+    .combine(CONCATENATE_PRIMERS.out.candidate_primers)
+    .set {ps_pairedFiles}
+
+    PRIMERSEARCH(ps_pairedFiles) 
     ch_versions = ch_versions.mix(PRIMERSEARCH.out.versions)
 
     // join 3 channels into input for PARSE_PRIMERSEARCH
-    PRIMER3.out.primer3_output
-    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
-    .set { keyedPrimer3output_ch }
+    // PRIMER3.out.primer3_output
+    // .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    // .set { keyedPrimer3output_ch }
 
-    keyedPrimer3output_ch
-    .join(keyedTrimalFiles)
-    .set { pairedFiles_primer3_trimal_ch }
+    // keyedPrimer3output_ch
+    // .join(keyedTrimalFiles)
+    // .set { pairedFiles_primer3_trimal_ch }
 
+    // PRIMERSEARCH.out.search_output
+    // .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
+    // .set { keyedPrimersearch_output_ch }
+
+    // pairedFiles_primer3_trimal_ch
+    // .join(keyedPrimersearch_output_ch)
+    // .map { key, primer3, trimal, ps -> tuple(primer3, trimal, ps) }
+    // .set { pairedFiles_primer3_trimal_ps_ch }
+
+    // PARSE_PRIMERSEARCH(pairedFiles_primer3_trimal_ps_ch, params.number_isolates)
     PRIMERSEARCH.out.search_output
-    .map { file -> tuple(file.baseName.split('\\.')[0], file) } // Extract key (OG0001903)
-    .set { keyedPrimersearch_output_ch }
+    .combine(stool_good_contig_list_ch)
+    .set {paired_parse_ps_ch}
+    PARSE_PRIMERSEARCH(paired_parse_ps_ch)
+    CONCATENATE_GOOD_PRIMERS(PARSE_PRIMERSEARCH.out.primer_output.collect(), CONCATENATE_PRIMERS.out.candidate_primers)
 
-    pairedFiles_primer3_trimal_ch
-    .join(keyedPrimersearch_output_ch)
-    .map { key, primer3, trimal, ps -> tuple(primer3, trimal, ps) }
-    .set { pairedFiles_primer3_trimal_ps_ch }
+    SNP_REDUNDANCY_FILTER(PRIMER3.out.primer3_output.collect(), CONCATENATE_GOOD_PRIMERS.out.candidate_primers)
 
-    PARSE_PRIMERSEARCH(pairedFiles_primer3_trimal_ps_ch, params.number_isolates)
-    if (params.run_compare_primers) {
-        if (!params.legacy_file_path) {
-            error "Primer search is enabled but no search file provided. Please provide --search_file"
-        }
-        //CONCATENATE_PRIMERS(PARSE_PRIMER3.out.primer_output.collect())
-        CONCATENATE_PRIMERS(PARSE_PRIMERSEARCH.out.primer_output.collect())
-        reference = channel.fromPath(params.legacy_file_path)
-        COMPARE_PRIMERS(reference, CONCATENATE_PRIMERS.out.candidate_primers)
-    }
+    // if (params.run_compare_primers) {
+    //     if (!params.legacy_file_path) {
+    //         error "Primer search is enabled but no search file provided. Please provide --search_file"
+    //     }
+    //     //CONCATENATE_PRIMERS(PARSE_PRIMER3.out.primer_output.collect())
+    //     CONCATENATE_PRIMERS(PARSE_PRIMERSEARCH.out.primer_output.collect())
+    //     reference = channel.fromPath(params.legacy_file_path)
+    //     COMPARE_PRIMERS(reference, CONCATENATE_PRIMERS.out.candidate_primers)
+    // }
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )

@@ -140,7 +140,8 @@ def print_primers(primer3_file, clearedPrimers):
     orthogroup = primer3_file.split('.')[0]
     for primers in clearedPrimers: #primerPairObjectList: 
         full_primerInfoList = []
-        full_primerInfoList.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}")
+        # full_primerInfoList.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}")
+        full_primerInfoList.append(f"{orthogroup}primerGroup{primers.number}\t{primers.leftSeq}\t{primers.rightSeq}")
         full_primerFileList.append(full_primerInfoList)
 
     f = open(primer3_file.split('.')[0]+'.Primers','w')

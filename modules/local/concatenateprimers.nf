@@ -4,10 +4,10 @@ process CONCATENATE_PRIMERS {
     path parsed_primersearch_primers
 
     output:
-    path 'concatenated_OGprimers.txt', emit: candidate_primers
+    path 'concatenated_primers_primer3.txt', emit: candidate_primers
 
     script:
     """
-    cat $parsed_primersearch_primers > concatenated_OGprimers.txt
+    cat $parsed_primersearch_primers > concatenated_primers_primer3.txt
     """
 }
