@@ -81,6 +81,9 @@ nextflow run uel3/t3pio \
    --input <path/to/gbk/files> \
    --outdir <OUTDIR>
 ```
+Add the flowchart for the filtering part of the `t3pio` pipeline.  
+
+<p align="center"><img src="final_t3pio_filtering_pipeline.svg" alt="final_t3pio_filtering_pipeline" width="600"></p>  
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_;
