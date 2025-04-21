@@ -1,4 +1,9 @@
 process SNP_REDUNDANCY_FILTER {
+    conda 'conda-forge::pandas=2.2.3 python=3.9'
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/scanpy%3A1.7.0--py_0' :
+        'quay.io/biocontainers/biopython:1.78' }"
+    errorStrategy 'finish'
     
     input:
     path primer3_files

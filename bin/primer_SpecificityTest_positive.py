@@ -4,7 +4,7 @@ from functools import partial
 import glob
 
 '''
-python primer_SpecificityTest_positive.py /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/StoolBugsMultifastas_primersearch/ /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/StoolBugsMultifastas_primersearch_2023/bugs_samonella_contigs_list 10 stool_primer_specificity_result
+python primer_SpecificityTest_positive.py /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/StoolBugsMultifastas_primersearch/ /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/StoolBugsMultifastas_primersearch_2023/stoolbugs_samonella_contigs_list 10 stool_primer_specificity_result_new
 '''
 class OutputRecord:
     def __init__(self):
@@ -43,6 +43,7 @@ def multiHitPrimers(contigs, psObj):
         # Extract contig name from first word of hit_info
         hit_contig = obj.hit_info.split()[0] if obj.hit_info else ''
         if hit_contig not in contigs and obj.length < 1000:
+        # if hit_contig in contigs and obj.length < 1000:
             # if obj.length > 100:
             #     print (f"hit_contig is: {hit_contig}, obj.length is {obj.length}")
             quality = False
@@ -63,9 +64,10 @@ def contigCompare(contigs, psInfo):
             hit_contig = amp.hit_info.split()[0] if amp.hit_info else ''
             
             if hit_contig not in contigs:
+            # if hit_contig in contigs:
                 if amp.length < 1000:
-                    # bad_primers.append(primer)
-                    bad_primers.append(f"{primer}_{amp.length}")
+                    bad_primers.append(primer)
+                    # bad_primers.append(f"{primer}_{amp.length}")
                 else:
                     off_target_large.append(primer)
         else:
@@ -99,7 +101,8 @@ def main(args):
         fh.write("\n".join(list(dict.fromkeys(p for res in results for p in res[0]))))
     
     with open(f"{args.outfile}_large_offtargets", "w") as fh:
-        fh.write("\n".join([p for res in results for p in res[1]]))
+        # fh.write("\n".join([p for res in results for p in res[1]]))
+        fh.write("\n".join(list(dict.fromkeys(p for res in results for p in res[1]))))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Primersearch analysis tool')
