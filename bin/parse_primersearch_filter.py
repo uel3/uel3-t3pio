@@ -3,9 +3,6 @@
 import argparse
 from functools import partial
 
-'''
-python primer_SpecificityTest_positive.py /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/StoolBugsMultifastas_primersearch/ /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/StoolBugsMultifastas_primersearch_2023/stoolbugs_samonella_contigs_list 10 stool_primer_specificity_result_new
-'''
 class OutputRecord:
     def __init__(self):
         self.amplifiers = {}
@@ -26,7 +23,6 @@ def readPrimersearch(handle):
         if line.startswith('Primer name'):
             current_name = line.split()[-1]
             record.amplifiers[current_name] = []
-        # elif line.startswith('Amplimer'):
         elif line.startswith('Amplimer') and 'length' not in line:
             record.amplifiers[current_name].append(Amplifier())
         elif line.startswith('Sequence:'):
@@ -43,9 +39,6 @@ def multiHitPrimers(contigs, psObj):
         # Extract contig name from first word of hit_info
         hit_contig = obj.hit_info.split()[0] if obj.hit_info else ''
         if hit_contig not in contigs and obj.length < 1000:
-        # if hit_contig in contigs and obj.length < 1000:
-            # if obj.length > 100:
-            #     print (f"hit_contig is: {hit_contig}, obj.length is {obj.length}")
             quality = False
     return quality
 
@@ -59,10 +52,8 @@ def contigCompare(contigs, psInfo):
             hit_contig = amp.hit_info.split()[0] if amp.hit_info else ''
             
             if hit_contig not in contigs:
-            # if hit_contig in contigs:
                 if amp.length < 1000:
                     bad_primers.append(primer)
-                    # bad_primers.append(f"{primer}_{amp.length}")
                 else:
                     off_target_large.append(primer)
         else:
@@ -81,29 +72,12 @@ def main(args):
     with open(args.contigFile, "r") as fh:
         contigs = [line.strip() for line in fh if line.strip()]
     
-    # Get all .ps files in directory
-    # ps_files = glob.glob(f"{args.psFilePath}/*.ps")
     bad_primers, off_target_large = process_file(args.psFile, contigs)
-    
-    # Parallel processing
-    # with multiprocessing.Pool(args.numCores) as pool:
-    #     results = pool.map(partial(process_file, contigs=contigs), ps_files)
-    
-    # Write outputs
-    # with open(args.outfile, "w") as fh:
-    #     # fh.write("\n".join([p for res in results for p in res[0]]))
-    #     # remove duplicates, and keep original orders
-    #     fh.write("\n".join(list(dict.fromkeys(p for res in results for p in res[0]))))
-    
-    # with open(f"{args.outfile}_large_offtargets", "w") as fh:
-    #     # fh.write("\n".join([p for res in results for p in res[1]]))
-    #     fh.write("\n".join(list(dict.fromkeys(p for res in results for p in res[1]))))
 
     with open(args.outfile, "w") as fh:
-        # fh.write("\n".join([p for res in results for p in res[0]]))
         # remove duplicates, and keep original orders
-        fh.write("\n".join(list(dict.fromkeys(p for p in bad_primers))))
-        # fh.write("\n".join(list(dict.fromkeys(p for p in off_target_large))))
+        fh.writelines(primer + "\n" for primer in dict.fromkeys(bad_primers))
+
 
 
 if __name__ == "__main__":

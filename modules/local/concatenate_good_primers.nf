@@ -1,7 +1,7 @@
 process CONCATENATE_GOOD_PRIMERS {
-    conda 'conda-forge::pandas=2.2.3 python=3.9'
+    conda 'conda-forge::biopython=1.78 python=3.9'
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/scanpy%3A1.7.0--py_0' :
+        'https://depot.galaxyproject.org/singularity/biopython:1.78' :
         'quay.io/biocontainers/biopython:1.78' }"
 
     input:
@@ -9,8 +9,7 @@ process CONCATENATE_GOOD_PRIMERS {
     path all_primers
 
     output:
-    path 'concatenated_primers_specificity.txt', emit: candidate_primers
-    // path 'concatenated_badprimers.txt', emit: bad_primers, optional: true
+    path 'concatenated_primers_specificity.txt', emit: candidate_primers, optional: true
 
     script:
     """

@@ -3,15 +3,14 @@ process SNP_REDUNDANCY_FILTER {
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/scanpy%3A1.7.0--py_0' :
         'quay.io/biocontainers/biopython:1.78' }"
-    errorStrategy 'finish'
     
     input:
     path primer3_files
     path candidate_primers
 
     output:
-    path 'concatenated_primers_snpfiltered.txt', emit: snp_filtered_good_primers
-    path 'concatenated_primers_final*.txt', emit: final_primers
+    path 'concatenated_primers_snpfiltered.txt', emit: snp_filtered_good_primers, optional: true
+    path 'concatenated_primers_final*.txt', emit: final_primers, optional: true
 
     script:
     """

@@ -58,7 +58,6 @@ def primer3Parser(primer3_file):
         primer_lines = f.read()
     
     primer3Dict = {}
-    # primer3Dict[(r2.split('\n')[0]).split('=')[1]] = r2.replace('=', '\n').split('\n')[1:]
     primer3Dict[(primer_lines.split('\n')[0]).split('=')[1]] = primer_lines.replace('=', '\n').split('\n')[1:]
 
     primerPairObjectList = []
@@ -123,24 +122,11 @@ def primer3Parser(primer3_file):
 #print out the cleared primers to a file with extension .Primers
 def print_primers(primer3_file, clearedPrimers):
 
-    # primerFileList = []
-    # for primers in clearedPrimers: #primerPairObjectList: 
-    #     primerInfoList = []
-    #     primerInfoList.append(str(primers.number)+'\t'+primers.leftSeq+'\t'+primers.rightSeq)
-    #     primerFileList.append(primerInfoList)
-
-    # f = open(primer3_file.split('.')[0]+'.Primers','w')
-    # for primerInfo in primerFileList:
-    #     for primers in primerInfo:
-    #         print(primers,file=f)
-    # f.close()
-
     #print out primers in 'standard' oligo group format
     full_primerFileList = []
     orthogroup = primer3_file.split('.')[0]
     for primers in clearedPrimers: #primerPairObjectList: 
         full_primerInfoList = []
-        # full_primerInfoList.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}")
         full_primerInfoList.append(f"{orthogroup}primerGroup{primers.number}\t{primers.leftSeq}\t{primers.rightSeq}")
         full_primerFileList.append(full_primerInfoList)
 

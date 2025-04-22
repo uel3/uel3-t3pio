@@ -22,7 +22,8 @@ process PRIMERSEARCH {
         primersearch -seqall !{trimalFile} \
                     -infile !{primersearchFile} \
                     -mismatchpercent 6 \
-                    -outfile !{trimalFile.baseName}.ps
+                    -outfile !{trimalFile.baseName}.ps 
+
     else
         echo "Error: Primersearch failed for !{trimalFile.baseName}" >> primersearch_error.log
     fi

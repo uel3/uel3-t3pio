@@ -114,10 +114,6 @@ def snpOverlapFilter(snp_dict):
         for j in range(i + 1, len(keys)):  # Compare each pair once
             key1, key2 = keys[i], keys[j]
 
-            # # If already marked for deletion, skip
-            # if key1 in to_delete or key2 in to_delete:
-            #     continue
-
             snplist1, left1, right1 = snp_dict[key1]
             snplist2, left2, right2 = snp_dict[key2]
 
@@ -153,7 +149,6 @@ def primer3Parser(primer3_file, valid_primer_list):
         primer_lines = f.read()
     
     primer3Dict = {}
-    # primer3Dict[(r2.split('\n')[0]).split('=')[1]] = r2.replace('=', '\n').split('\n')[1:]
     primer3Dict[(primer_lines.split('\n')[0]).split('=')[1]] = primer_lines.replace('=', '\n').split('\n')[1:]
 
     primerPairObjectList = []
@@ -222,7 +217,6 @@ def primer3Parser(primer3_file, valid_primer_list):
         if full_primer in valid_primer_list:
             clearedclearedPrimers.append(primer)
 
-    # print (f"clearedclearedPrimers size is: {len(clearedclearedPrimers)}")
 
     #snp info
     snpdict = {}
@@ -237,25 +231,16 @@ def primer3Parser(primer3_file, valid_primer_list):
                 snplist.append(snpSite) #logic for finding snp positions in the amplicon
             a += 1
 
-        # orthogroup = primer3_file.split('.')[0]
-        # snpdict[f"{orthogroup}primerGroup{primer.number}"] = [snplist, primer.leftSeq, primer.rightSeq]
         snpdict[primer] = [snplist, primer.leftSeq, primer.rightSeq]
 
-    # final_snpdict = snpOverlapFilter(snpdict)
     final_snpdict, deleted_snpdict = snpOverlapFilter(snpdict)
     final_clearedPrimers = final_snpdict.keys()
-
-    # return(final_clearedPrimers, final_snpdict)
-    # return(final_clearedPrimers, deleted_snpdict)  #this is the one
 
 
     for key in final_snpdict:
         snplist, left, right = final_snpdict[key]
         final_snpdict[key] = (snplist, left, right, primerScore(left)+primerScore(right))
         
-    # for key in deleted_snpdict:
-    #     snplist, left, right = deleted_snpdict[key]
-    #     deleted_snpdict[key] = (snplist, left, right, primerScore(left)+primerScore(right))
 
     return(final_snpdict, deleted_snpdict)  #test hack only
 
@@ -286,36 +271,20 @@ def process_primer3_files(primer3_files, primer_file, output_file):
 
     deleted_lines = []
     
-    # for primer3_file in glob.glob(os.path.join(primer3_folder, "*.primer3")):
     for primer3_file in primer3_files:
         og_id = os.path.basename(primer3_file).split('.')[0]  # Extract OG identifier
 
         if og_id in primer_groups:
-            # clearedPrimers, _ = primer3Parser(primer3_file, primer_groups[og_id])
-            # clearedPrimers, deleted_dict = primer3Parser(primer3_file, primer_groups[og_id])
 
             cleared_dict, deleted_dict = primer3Parser(primer3_file, primer_groups[og_id])
 
             orthogroup = os.path.basename(primer3_file).split('.')[0]
-            # for primers in clearedPrimers:
-            #     # output_lines.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}")
-            #     output_lines.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}\t{primers.leftHit}\t{primers.rightHit}")
 
-            for primers in cleared_dict:
-                # output_lines.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}")
-                # output_lines.append(f"{orthogroup}primerGroup{primers.number}\t{cleared_dict[primers][0]}\t{cleared_dict[primers][3]}")    
+            for primers in cleared_dict:   
                 output_lines.append(f"{orthogroup}primerGroup{primers.number}\t{cleared_dict[primers][1]}\t{cleared_dict[primers][2]}")  
-            # for primers in deleted_dict:
-            #     # output_lines.append(f"primer\t{primers.leftSeq}\t{primers.rightSeq}\t{orthogroup}primerGroup{primers.number}")
-            #     deleted_lines.append(f"{orthogroup}primerGroup{primers.number}\t{deleted_dict[primers][0]}\t{deleted_dict[primers][3]}")    
-
     
     with open(output_file, 'w') as out_file:
         out_file.write("\n".join(output_lines) + "\n")
-
-    # with open(deleted_primers_file, 'w') as out_file:
-    #     out_file.write("\n".join(deleted_lines) + "\n")
-
 
 # # Example usage
 # primer3_folder = "/scicomp/home-pure/qtl7/test/t3pio/uel3-t3pio/test_primer3_01132025_2/Primer3"
@@ -336,6 +305,4 @@ if __name__ == "__main__":
     parser.add_argument('outFile', help='Base name for output files')
     
     args = parser.parse_args()
-    # main(args)
-    #snp_overlap_filter.py $primer3_files $candidate_primers "snp_filtered_good_primers.txt"
     process_primer3_files(args.p3File, args.primerFile, args.outFile)

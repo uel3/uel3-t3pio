@@ -6,20 +6,10 @@ process PARSE_PRIMERSEARCH {
     tag "${primersearch.baseName}"
 
     input:
-    // tuple path(primer3), path(trimal), path(primersearch)
-    // val (number_isolates)
     tuple path(primersearch), path(good_contig_list)
 
     output:
     path "*.badprimer", emit: primer_output, optional: true
-    // path "*.amplicon", emit: amplicon_output
-
-    // path "versions.yml", emit: versions
-
-    // #parse_primersearch.py --primer3_file !{primer3} \
-    // #                      --trimal_file !{trimal} \
-    // #                      --primersearch_file !{primersearch} \
-    // #                      --number_isolates !{number_isolates}
 
     shell:
     '''
