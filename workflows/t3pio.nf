@@ -46,15 +46,13 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // MODULE: Installed directly from nf-core/modules
 //
-//include { FASTQC                      } from '../modules/nf-core/fastqc/main'
+
 
 
 // Import modules
 include { PARSE_GENBANK               } from '../modules/local/parsegbk'
-//include { COMBINE_FAA_FILES } from '../modules/local/combinefaa'
 include { ORTHOFINDER                 } from '../modules/nf-core/orthofinder'
 include { PARSE_ORTHOFINDER           } from '../modules/local/orthofinderparser'
-//include { ORTHOFINDER_CLASS_CHECK } from '../modules/local/orthofinderclasscheck'
 include { ORTHOFINDER_PARING          } from '../modules/local/orthofinderparing'
 include { COMBINE_JSON                } from '../modules/local/combineparsedjson'
 include { MULTIFASTA_GENERATOR        } from '../modules/local/multifastagenerator'
@@ -63,15 +61,15 @@ include { TRIMAL                      } from '../modules/local/trimal'
 include { CONSAMBIG                   } from '../modules/local/embossconsambig'
 include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
-include { PRIMER3 } from '../modules/local/primer3'
-include { BOULDER } from '../modules/local/boulder'
-include { PARSE_PRIMER3 } from '../modules/local/parse_primer3'
-include { PRIMERSEARCH } from '../modules/local/primersearch'
-include { PARSE_PRIMERSEARCH } from '../modules/local/parse_primersearch'
-include { CONCATENATE_PRIMERS } from '../modules/local/concatenateprimers'
-include { COMPARE_PRIMERS } from '../modules/local/comparelegacyprimers'
-include { CONCATENATE_GOOD_PRIMERS } from '../modules/local/concatenate_good_primers'
-include { SNP_REDUNDANCY_FILTER } from '../modules/local/snp_redundancy_filter'
+include { PRIMER3                     } from '../modules/local/primer3'
+include { BOULDER                     } from '../modules/local/boulder'
+include { PARSE_PRIMER3               } from '../modules/local/parse_primer3'
+include { PRIMERSEARCH                } from '../modules/local/primersearch'
+include { PARSE_PRIMERSEARCH          } from '../modules/local/parse_primersearch'
+include { CONCATENATE_PRIMERS         } from '../modules/local/concatenateprimers'
+include { COMPARE_PRIMERS             } from '../modules/local/comparelegacyprimers'
+include { CONCATENATE_GOOD_PRIMERS    } from '../modules/local/concatenate_good_primers'
+include { SNP_REDUNDANCY_FILTER       } from '../modules/local/snp_redundancy_filter'
 
 //Import subworkflows
 include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrouplist'
@@ -153,9 +151,7 @@ workflow T3PIO {
     ch_versions = ch_versions.mix(TRIMAL.out.versions)
     CONSAMBIG(TRIMAL.out.trimmed_alignment) //using emboss 6.4.0
     ch_versions = ch_versions.mix(CONSAMBIG.out.versions)
-    // TODO: OPTIONAL, you can use nf-validation plugin to create an input channel from the samplesheet with Channel.fromSamplesheet("input")
-    // See the documentation https://nextflow-io.github.io/nf-validation/samplesheets/fromSamplesheet/
-    // ! There is currently no tooling to help you write a sample sheet schema
+
 
     // THIS IS TEMPORARY. These consambig.fa files need to be passed down from upstream consambig process 
     //Channel.fromPath("${params.primer3_input}/*.fa", checkIfExists: true).set { primer3_input_ch }
