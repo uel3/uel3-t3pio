@@ -1,7 +1,7 @@
 process TRIMAL {
-    //container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        //'https://depot.galaxyproject.org/singularity/trimal:1.4.1--0' :
-        //'quay.io/biocontainers/trimal:1.4.1--0' }"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/trimal:1.4.1--0' :
+        'quay.io/biocontainers/trimal:1.4.1--0' }"
     
     input:
     path muscle_file
@@ -12,12 +12,12 @@ process TRIMAL {
     
     script:
     """
-    ${params.trimal_path} -in ${muscle_file} -out ${muscle_file.baseName}.trimAl -fasta -automated1
+    trimal -in ${muscle_file} -out ${muscle_file.baseName}.trimAl -fasta -automated1
     
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        trimAl: "\$(${params.trimal_path} --version | sed -E 's/^[^0-9]*([0-9.]+[^[:space:]]*).*$/\1/')"
+        trimAl: \$(trimal -v | grep -o 'v[0-9]\\+\\.[0-9]\\+\\.[0-9]\\+' | sed 's/v//')
     END_VERSIONS
     """
 }
