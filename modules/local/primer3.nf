@@ -1,10 +1,8 @@
 process PRIMER3 {
-    // conda 'conda-forge::primer3==2.6.0--pl5262h1b792b2_0'
-    // container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-    //     // 'https://depot.galaxyproject.org/singularity/primer3:2.6.0--pl5262h1b792b2_0' :
-    //     // 'quay.io/biocontainers/primer3:2.6.0--pl5262h1b792b2_0' }"
-    //     'https://depot.galaxyproject.org/singularity/primer3%3A2.3.7--pl526hfc679d8_1':
-    //     null }"
+     conda 'bioconda::primer3==2.6.1'
+     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/primer3:2.6.1--pl5321hdbdd923_4' :
+        'quay.io/biocontainers/primer3:2.6.1--pl5321hdbdd923_4' }"
     tag "${boulder.baseName}"
     
     input:
@@ -20,9 +18,9 @@ process PRIMER3 {
     shell:
     '''
     base_name=$(basename "!{boulder}" .boulder)
-    !{params.primer3_path} "!{boulder}" > "${base_name}.primer3"
+    primer3_core "!{boulder}" > "${base_name}.primer3"
 
-    primer3_version=$(!{params.primer3_path} -ab)
+    primer3_version=$(primer3_core -ab)
 
     cat <<-END_VERSIONS > versions.yml
     "!{task.process}":
