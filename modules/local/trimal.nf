@@ -21,7 +21,7 @@ process TRIMAL {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        trimAl: "\$(${params.trimal_path} --version | sed -n 's/trimAl v\\(.*\\)/\\1/p')"
+        trimAl: "\$(${params.trimal_path} --version 2>&1 || echo "unknown")"
     END_VERSIONS
     """
 }
