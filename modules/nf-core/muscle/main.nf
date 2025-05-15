@@ -4,7 +4,7 @@ process MUSCLE {
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/muscle%3A5.3--h4ac6f70_0' :
         'biocontainers/muscle:5.3--h4ac6f70_0' }"
-    maxForks = 2
+    maxForks = 1
     memory = '4 GB'
 
     input:
