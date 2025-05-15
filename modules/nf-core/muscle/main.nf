@@ -24,7 +24,7 @@ process MUSCLE {
     
     """
     muscle \\
-        -profile $multifasta \\
+        -align $multifasta \\
         -output ${prefix}.muscle \\
         -quiet
 
