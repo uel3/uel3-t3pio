@@ -1,7 +1,7 @@
 
 process TRIMAL {
     
-    label 'process_high'
+    #label 'process_high'
     conda 'bioconda::trimal==1.5.0'
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/trimal%3A1.5.0--h9948957_2' :
