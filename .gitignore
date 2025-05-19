@@ -9,3 +9,4 @@ testing*
 README2.md
 qsub_t3pio.sh
 cdc-dev.config
+nextflow.config
