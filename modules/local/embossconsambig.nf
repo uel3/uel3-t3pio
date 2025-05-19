@@ -12,11 +12,11 @@ process CONSAMBIG {
     
     script:
     """
-    /scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/library_versions_t3pio/EMBOSS-6.4.0/emboss/consambig -sequence ${trimmed_alignment} -outseq ${trimmed_alignment.baseName}.fa -name ${trimmed_alignment.baseName} -snucleotide -sformat1 fasta -osformat2 fasta
+    ${params.consambig_path} -sequence ${trimmed_alignment} -outseq ${trimmed_alignment.baseName}.fa -name ${trimmed_alignment.baseName} -snucleotide -sformat1 fasta -osformat2 fasta
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        emboss: \$(echo \$(/scicomp/groups/OID/NCEZID/DFWED/EDLB/projects/T3Pio_Data/library_versions_t3pio/EMBOSS-6.4.0/emboss/consambig -version 2>&1) | sed 's/EMBOSS://')
+        emboss: \$(echo ${params.consambig_path} -version 2>&1) | sed 's/EMBOSS://')
     END_VERSIONS
     """
 }
