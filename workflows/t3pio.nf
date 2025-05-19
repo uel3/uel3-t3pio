@@ -146,7 +146,7 @@ workflow T3PIO {
     MULTIFASTA_GENERATOR(ORTHOFINDER_PARING.out.pared_orthogroups,COMBINE_JSON.out.nucleotide_dict)
     ch_versions = ch_versions.mix(MULTIFASTA_GENERATOR.out.versions)
     MUSCLE(MULTIFASTA_GENERATOR.out.multifasta.flatten())
-    ch_versions = ch_versions.mix(MUSCLE.out.versions)
+    // ch_versions = ch_versions.mix(MUSCLE.out.versions)
     TRIMAL(MUSCLE.out.muscle_files) //using trimAl 1.2
     ch_versions = ch_versions.mix(TRIMAL.out.versions)
     CONSAMBIG(TRIMAL.out.trimmed_alignment) //using emboss 6.4.0
