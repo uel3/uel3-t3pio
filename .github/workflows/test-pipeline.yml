@@ -62,3 +62,31 @@ jobs:
             --contig_file toy_data/contigs \
             --outdir test
 
+      - name: Compare test output with reference
+        shell: bash -l {0}
+        run: |
+          echo "Comparing test/primers/ with toy_data/ref/"
+
+          # Ensure all files are sorted before comparison (assuming text files)
+          for file in test/primers/*; do
+            filename=$(basename "$file")
+            ref="toy_data/ref/$filename"
+
+            if [[ -f "$ref" ]]; then
+              echo "Comparing $filename..."
+              
+              # Sort both files before comparing (ignores line order differences)
+              diff <(sort "$file") <(sort "$ref") || {
+                echo "❌ Difference found in $filename"
+                exit 1
+              }
+
+            else
+              echo "❌ Reference file $ref not found"
+              exit 1
+            fi
+          done
+
+          echo "✅ All primer output files match reference files."
+
+
