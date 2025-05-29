@@ -185,9 +185,7 @@ workflow T3PIO {
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
     )
-    //
     // MODULE: MultiQC
-    //
     workflow_summary    = WorkflowT3pio.paramsSummaryMultiqc(workflow, summary_params)
     ch_workflow_summary = Channel.value(workflow_summary)
 

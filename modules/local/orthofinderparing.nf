@@ -14,7 +14,7 @@ process ORTHOFINDER_PARING {
     def args = task.ext.args ?: ''
     """
     echo "Debug: args are $args"
-    orthofinderparing.py $args --orthogroups $orthogroupResultsFile
+    orthofinderparing.py $args --orthogroups $orthogroupResultsFile --test_size ${params.og_group_size}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')

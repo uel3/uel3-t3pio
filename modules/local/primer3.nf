@@ -20,9 +20,10 @@ process PRIMER3 {
     shell:
     '''
     base_name=$(basename "!{boulder}" .boulder)
-    !{params.primer3_path} "!{boulder}" > "${base_name}.primer3"
+    
+    primer3_core "!{boulder}" > "${base_name}.primer3"
 
-    primer3_version=$(!{params.primer3_path} -ab)
+    primer3_version=$(primer3_core -ab)
 
     cat <<-END_VERSIONS > versions.yml
     "!{task.process}":

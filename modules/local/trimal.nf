@@ -16,8 +16,8 @@ process TRIMAL {
     
     script:
     """
-    ${params.trimal_path} -in ${muscle_file} -out ${muscle_file.baseName}.trimAl -fasta -automated1
     
+    trimal -in ${muscle_file} -out ${muscle_file.baseName}.trimAl -fasta -automated1
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

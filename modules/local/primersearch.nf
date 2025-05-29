@@ -1,8 +1,8 @@
 process PRIMERSEARCH {
-    conda 'bioconda::emboss==6.6.0'
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/emboss:6.6.0--hf657eab_5':
-        'biocontainers/emboss:6.6.0--h440b012_4' }"
+    // conda 'bioconda::emboss==6.6.0'
+    // container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    //     'https://depot.galaxyproject.org/singularity/emboss:6.6.0--hf657eab_5':
+    //     'biocontainers/emboss:6.6.0--h440b012_4' }"
     tag "${trimalFile.baseName}"
     errorStrategy "ignore"
     
