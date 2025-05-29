@@ -33,12 +33,17 @@ def OrthofinderParing(numberOfIsolates, percentInclusion, orthofinderObjectList)
                 paredDownList.append(orthogroups)
     return paredDownList
 
+def nullable_int(val):
+    if val.lower() == 'null':
+        return None
+    return int(val)
+
 def main():
     parser = argparse.ArgumentParser(description='Pare down Orthofinder results based on isolate inclusion criteria.')
     parser.add_argument('--number_isolates', type=int, required=True, help='Number of isolates originally submitted')
     parser.add_argument('--percent_inclusion', type=float, required=True, help='Percent inclusion to be considered an orthogroup')
     parser.add_argument('--orthogroups', type=str, required=True, help='Path to the Orthofinder results file')
-    parser.add_argument('--test_size', type=int, required=False, help='test data size for the orthogroup')
+    parser.add_argument('--test_size', type=nullable_int, required=False, help='test data size for the orthogroup')
     
     args = parser.parse_args()
 
@@ -47,7 +52,8 @@ def main():
 
     # Run the OrthofinderParing function
     paredDownList = OrthofinderParing(args.number_isolates, args.percent_inclusion, orthofinderObjectList)
-    paredDownList = paredDownList[:args.test_size]
+    if args.test_size:
+        paredDownList = paredDownList[:args.test_size]
 
     # Write the results to a file in the same format as the input
     with open('pared_orthogroups.txt', 'w') as f:

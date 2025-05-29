@@ -30,20 +30,20 @@
 4. TrimAl (v1.2)
 5. EMBOSS consambig (v.6.4.0)
 6. Primer3 (2.3.4)
-7. EMBOSS primersearch (v6.6.0)
+7. EMBOSS primersearch (v6.4.0)
 
 
 ## Usage
 
-Running T3pio requires Nextflow (>=21.10.3) and singulairity to be installed. There are detailed instructions below for Nextflow installation, including Nextflow's Bash and Java requirements. Currently, singularity is required for the orthofinder process therefore, we recommend using singualrity for all required dependencies.
+Running T3pio requires Nextflow (>=21.10.3) and singulairity to be installed. There are detailed instructions below for Nextflow installation, including Nextflow's Bash and Java requirements. Currently, all required dependencies—except for Nextflow—are provided through Docker and Singularity images .
 > [!NOTE]
 > If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
 
 
-When Nextflow and conda are installed, clone the pipeline:
-'''bash
-git clone https://github.com/uel3/uel3-t3pio
-'''
+After Nextflow is installed, clone the pipeline:  
+```bash
+git clone https://github.com/uel3/uel3-t3pio  
+```
 
 <!-- TODO nf-core: Describe the minimum required steps to execute the pipeline, e.g. how to prepare samplesheets.
      Explain what rows and columns represent. For instance (please edit as appropriate):
@@ -66,10 +66,14 @@ Now, you can run the pipeline using:
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
-nextflow run uel3/t3pio \
-   -profile <docker/singularity/.../institute> \
+nextflow run main.nf \
+   -profile singularity,t3pio_docker \
    --input <path/to/gbk/files> \
-   --outdir <OUTDIR>
+   --contig_file <path/to/contig_file(for filtering)> \
+   --outdir <OUTDIR> \
+   --good_contig_list <path/to/good_contig_list_file> \
+   --run_compare_primers (either true or false) \
+   --number_isolates (the number of isolates to be included in an orthogroup) \
 ```
 To run, test against existing MLST primers, turn on the legacy_file_path process and provide the path to existing MLST primers file from the CLI or in the nextflow.config as legacy_file_path:
 
