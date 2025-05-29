@@ -1,0 +1,95 @@
+name: Test T3pio
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Java (required for Nextflow)
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install dependencies for Singularity
+        run: |
+          sudo apt-get update && sudo apt-get install -y \
+            build-essential \
+            libseccomp-dev \
+            pkg-config \
+            squashfs-tools \
+            cryptsetup \
+            wget \
+            uidmap \
+            git \
+            libglib2.0-dev \
+            libfuse3-dev \
+            libgpgme-dev \
+            libssl-dev \
+            golang-go
+
+      - name: Install Singularity
+        run: |
+          export VERSION=3.11.5
+          wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-ce-${VERSION}.tar.gz
+          tar -xzf singularity-ce-${VERSION}.tar.gz
+          cd singularity-ce-${VERSION}
+          ./mconfig
+          make -C builddir
+          sudo make -C builddir install
+          singularity --version
+
+      - name: Install Nextflow
+        run: |
+          curl -s https://get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+
+      - name: Run test pipeline
+        shell: bash -l {0}  # if needed for conda; otherwise can use just "bash"
+        run: |
+          nextflow run main.nf -profile singularity,t3pio_docker,git_action \
+            --input test_data/reads \
+            --good_contig_list test_data/stoolbugs_samonella_contigs_list \
+            --og_group_size 50 \
+            --number_isolates 3 \
+            --run_compare_primers false \
+            --contig_file test_data/contigs \
+            --outdir test
+
+      - name: Compare test output with reference
+        shell: bash -l {0}
+        run: |
+          echo "Comparing test/primers/ with toy_data/ref/"
+
+          # Ensure all files are sorted before comparison (assuming text files)
+          for file in test/primers/*; do
+            filename=$(basename "$file")
+            ref="test_data/ref/$filename"
+
+            if [[ -f "$ref" ]]; then
+              echo "Comparing $filename..."
+              
+              # Sort both files before comparing (ignores line order differences)
+              diff <(sort "$file") <(sort "$ref") || {
+                echo "❌ Difference found in $filename"
+                exit 1
+              }
+
+            else
+              echo "❌ Reference file $ref not found"
+              exit 1
+            fi
+          done
+
+          echo "✅ All primer output files match reference files."
+
+
