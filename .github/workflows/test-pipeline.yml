@@ -63,7 +63,8 @@ jobs:
             --number_isolates 3 \
             --run_compare_primers false \
             --contig_file test_data/contigs \
-            --outdir test
+            --outdir test \
+            -c conf/git_action.config
 
       - name: Compare test output with reference
         shell: bash -l {0}
