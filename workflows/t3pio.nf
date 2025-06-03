@@ -83,6 +83,10 @@ include { ORTHOGROUP_LIST_PASS_FAIL } from '../subworkflows/local/checkorthogrou
 def multiqc_report = []
 // Define input parameters
 
+// Create flags for --contig_file and --good_contig_list (for filtering part)
+contig_file_ok = params.contig_file && file(params.contig_file).exists()
+contig_list_ok = params.good_contig_list && file(params.good_contig_list).exists()
+
 // Validate inputs
 workflow T3PIO {
 
@@ -157,21 +161,26 @@ workflow T3PIO {
     all_primers_ch = PARSE_PRIMER3.out.primer_output.collect()
     CONCATENATE_PRIMERS(all_primers_ch)
 
-    // PRIMERSEARCH(pairedFiles)
-    stool_contigs_ch
-    .combine(CONCATENATE_PRIMERS.out.candidate_primers)
-    .set {ps_pairedFiles}
+    // check wheter to skip filtering part
+    if (contig_file_ok && contig_list_ok) {
+        // PRIMERSEARCH(pairedFiles)
+        stool_contigs_ch
+        .combine(CONCATENATE_PRIMERS.out.candidate_primers)
+        .set {ps_pairedFiles}
 
-    PRIMERSEARCH(ps_pairedFiles) 
-    ch_versions = ch_versions.mix(PRIMERSEARCH.out.versions)
+        PRIMERSEARCH(ps_pairedFiles) 
+        ch_versions = ch_versions.mix(PRIMERSEARCH.out.versions)
 
-    PRIMERSEARCH.out.search_output
-    .combine(stool_good_contig_list_ch)
-    .set {paired_parse_ps_ch}
-    PARSE_PRIMERSEARCH(paired_parse_ps_ch)
-    CONCATENATE_GOOD_PRIMERS(PARSE_PRIMERSEARCH.out.primer_output.collect(), CONCATENATE_PRIMERS.out.candidate_primers)
+        PRIMERSEARCH.out.search_output
+        .combine(stool_good_contig_list_ch)
+        .set {paired_parse_ps_ch}
+        PARSE_PRIMERSEARCH(paired_parse_ps_ch)
+        CONCATENATE_GOOD_PRIMERS(PARSE_PRIMERSEARCH.out.primer_output.collect(), CONCATENATE_PRIMERS.out.candidate_primers)
 
-    SNP_REDUNDANCY_FILTER(PRIMER3.out.primer3_output.collect(), CONCATENATE_GOOD_PRIMERS.out.candidate_primers)
+        SNP_REDUNDANCY_FILTER(PRIMER3.out.primer3_output.collect(), CONCATENATE_GOOD_PRIMERS.out.candidate_primers)
+    } else {
+        log.warn "Neither --contig_file nor --good_contig_list exists. Skipping downstream pipeline."
+    }
 
     if (params.run_compare_primers) {
         if (!params.legacy_file_path) {
