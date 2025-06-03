@@ -68,13 +68,15 @@ Now, you can run the pipeline using:
 ```bash
 nextflow run main.nf \
    -profile singularity,t3pio_docker \
-   --input <path/to/gbk/files> \
-   --contig_file <path/to/contig_file(for filtering)> \
+   --input <path/to/gbk/files>(input genomes, in gbk format) \
+   --contig_file <path/to/contig_file(for filtering, fasta format)> \
    --outdir <OUTDIR> \
-   --good_contig_list <path/to/good_contig_list_file> \
+   --good_contig_list <path/to/good_contig_list_file(for filtering)> \
    --run_compare_primers (either true or false) \
    --number_isolates (the number of isolates to be included in an orthogroup) \
 ```
+**note:** if either ```contig_file``` or ```good_contig_list``` is omitted, the pipeline will skip the filtering step, but will still proceed to generate the primer pool using the Primer3 process.    
+
 To run, test against existing MLST primers, turn on the legacy_file_path process and provide the path to existing MLST primers file from the CLI or in the nextflow.config as legacy_file_path:
 
 ```bash
