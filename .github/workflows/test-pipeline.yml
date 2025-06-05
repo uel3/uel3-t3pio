@@ -3,8 +3,26 @@ name: Test T3pio
 on:
   push:
     branches: [ master ]
+    paths:  
+      - '.github/workflows/**'
+      - 'bin/**'
+      - 'conf/**'
+      - 'lib/**'
+      - 'modules/**'
+      - 'workflows/**'
+      - 'main.nf'
+      - 'nextflow.config'
   pull_request:
     branches: [ master ]
+    paths:  
+      - '.github/workflows/**'
+      - 'bin/**'
+      - 'conf/**'
+      - 'lib/**'
+      - 'modules/**'
+      - 'workflows/**'
+      - 'main.nf'
+      - 'nextflow.config'
 
 jobs:
   run-pipeline:

@@ -95,7 +95,7 @@ nextflow run uel3/t3pio \
 
 the flowchart for the filtering part of the `t3pio` pipeline.  
 
-<p align="center"><img src="t3pio_flowchart_full.svg" alt="t3pio_flowchart_full" width="600"></p>   
+<p align="center"><img src="t3pio_flowchart_full.svg" alt="t3pio_flowchart_full"></p>   
 
 ## Primer Filtering Summary
 
