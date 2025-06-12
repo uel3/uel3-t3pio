@@ -124,11 +124,18 @@ def print_primers(primer3_file, clearedPrimers):
 
     #print out primers in 'standard' oligo group format
     full_primerFileList = []
+    primerBindingList = []
+    ampliconList = []
+
     orthogroup = primer3_file.split('.')[0]
     for primers in clearedPrimers: #primerPairObjectList: 
         full_primerInfoList = []
         full_primerInfoList.append(f"{orthogroup}primerGroup{primers.number}\t{primers.leftSeq}\t{primers.rightSeq}")
         full_primerFileList.append(full_primerInfoList)
+
+        primerBindingList.append(f"{orthogroup}primerGroup{primers.number}\t{primers.leftHit+primers.leftLen},{primers.rightHit}")
+        ampliconList.append(f">{orthogroup}primerGroup{primers.number}")
+        ampliconList.append(f"{primers.orthogroupInfo.sequence[(primers.leftHit+primers.leftLen)-1:(primers.rightHit)-1]}")
 
     f = open(primer3_file.split('.')[0]+'.Primers','w')
     for primerInfo in full_primerFileList:
@@ -136,6 +143,16 @@ def print_primers(primer3_file, clearedPrimers):
             print(primers,file=f)
     f.close()
 
+    # to log primer binding positions (start position is 1), and amplicon info
+    f = open(orthogroup +'.binding','w')
+    for primerBindingInfo in primerBindingList:
+        print(primerBindingInfo,file=f)
+    f.close()
+
+    f = open(orthogroup +'.amplicon.fasta','w')
+    for ampliconInfo in ampliconList:
+        print(ampliconInfo,file=f)
+    f.close()
 
 if __name__ == "__main__":
 

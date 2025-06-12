@@ -4,13 +4,15 @@ process PARSE_PRIMER3 {
         'https://depot.galaxyproject.org/singularity/biopython:1.78' :
         'quay.io/biocontainers/biopython:1.78' }"
     tag "${primer3.baseName}"    
+    errorStrategy 'terminate'
     
     input:
     path primer3
 
     output:
     path "*.Primers", emit: primer_output, optional: true
-
+    path "*.binding", emit: primer_binding, optional: true
+    path "*.fasta", emit: primer_amplicon, optional: true
 
     shell:
     '''
