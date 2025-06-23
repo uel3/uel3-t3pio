@@ -69,9 +69,9 @@ Now, you can run the pipeline using:
 nextflow run main.nf \
    -profile singularity,t3pio_docker \
    --input <path/to/gbk/files>(input genomes, in gbk format) \
-   --contig_file <path/to/contig_file(for filtering, fasta format)> \
+   --contig_file <path/to/contig_file(stool contigs file for filtering, fasta format)> \
    --outdir <OUTDIR> \
-   --good_contig_list <path/to/good_contig_list_file(for filtering)> \
+   --good_contig_list <path/to/good_contig_list_file(for filtering, these are true Salmonella contigs in this case)> \
    --run_compare_primers (either true or false) \
    --number_isolates (the number of isolates to be included in an orthogroup) \
 ```
@@ -95,7 +95,7 @@ nextflow run uel3/t3pio \
 
 the flowchart for the filtering part of the `t3pio` pipeline.  
 
-<p align="center"><img src="t3pio_flowchart_full.svg" alt="t3pio_flowchart_full"></p>   
+<p align="center"><img src="t3pio_flowchart_full_updated.svg" alt="t3pio_flowchart_full"></p>   
 
 ## Primer Filtering Summary
 
