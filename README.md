@@ -37,7 +37,7 @@
 
 Running T3pio requires Nextflow (>=21.10.3) and singulairity to be installed. There are detailed instructions below for Nextflow installation, including Nextflow's Bash and Java requirements. Currently, all required dependencies—except for Nextflow—are provided through Docker and Singularity images .
 > [!NOTE]
-> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow. Make sure to [test your setup](https://nf-co.re/docs/usage/introduction#how-to-run-a-pipeline) with `-profile test` before running the workflow on actual data.
+> If you are new to Nextflow and nf-core, please refer to [this page](https://nf-co.re/docs/usage/installation) on how to set-up Nextflow.  
 
 
 After Nextflow is installed, clone the pipeline:  
@@ -67,13 +67,20 @@ Now, you can run the pipeline using:
 
 ```bash
 nextflow run main.nf \
-   -profile singularity,t3pio_docker \
+   -profile singularity \
    --input <path/to/gbk/files>(input genomes, in gbk format) \
    --contig_file <path/to/contig_file(stool contigs file for filtering, fasta format)> \
    --outdir <OUTDIR> \
    --good_contig_list <path/to/good_contig_list_file(for filtering, these are true Salmonella contigs in this case)> \
    --run_compare_primers (either true or false) \
    --number_isolates (the number of isolates to be included in an orthogroup) \
+```
+
+To quickly test the pipeline with the bundled example dataset, run the following command:
+
+```bash
+nextflow run main.nf \
+   -profile singularity,test \
 ```
 
 > [!NOTE]   
