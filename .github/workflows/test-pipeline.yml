@@ -74,7 +74,7 @@ jobs:
       - name: Run test pipeline
         shell: bash -l {0}  # if needed for conda; otherwise can use just "bash"
         run: |
-          nextflow run main.nf -profile singularity,t3pio_docker,git_action \
+          nextflow run main.nf -profile singularity,git_action \
             --input test_data/reads \
             --good_contig_list test_data/stoolbugs_samonella_contigs_list \
             --og_group_size 50 \
