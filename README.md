@@ -74,6 +74,8 @@ nextflow run main.nf \
    --good_contig_list <path/to/good_contig_list_file(for filtering, these are true Salmonella contigs in this case)> \
    --run_compare_primers (either true or false) \
    --number_isolates (the number of isolates to be included in an orthogroup) \
+   --random (either true or false, randomly select a tied lowest score primer from each orthogroup) \
+   --seed (an integer random seed, if not specified, a random integer will be used and saved in 'seed_used.txt')
 ```
 
 To quickly test the pipeline with the bundled example dataset, run the following command:
