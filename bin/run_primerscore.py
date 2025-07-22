@@ -3,6 +3,8 @@
 import pandas as pd
 import argparse
 import os
+from datetime import datetime
+import random
 
 '''
 The input file is required to have this format
@@ -27,30 +29,78 @@ def primerScore(primer):
     score = spot/(len(primer))
     return score
 
-def get_lowest_score(group, return_first=False):
+# def get_lowest_score(group, return_first=False):
+#     scores = group.apply(lambda row: primerScore(row["forward"]) + primerScore(row["reverse"]), axis=1)
+#     lowest_score = scores.min()
+#     lowest_score_rows = group[scores == lowest_score]
+#     if return_first:
+#         return lowest_score_rows.iloc[0]  # Select the first row with the lowest score if there is a tie
+#     else:
+#         return lowest_score_rows
+
+def get_lowest_score(group, return_first=False, random_state=None):
     scores = group.apply(lambda row: primerScore(row["forward"]) + primerScore(row["reverse"]), axis=1)
     lowest_score = scores.min()
     lowest_score_rows = group[scores == lowest_score]
+
     if return_first:
-        return lowest_score_rows.iloc[0]  # Select the first row with the lowest score if there is a tie
+        return lowest_score_rows.iloc[0] # Select the first row with the lowest score if there is a tie
+    elif random_state is not None:
+        # Use Pandas sampling with fixed seed for deterministic group-wise selection
+        return lowest_score_rows.sample(n=1, random_state=random_state).iloc[0]
     else:
         return lowest_score_rows
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='filter primers for each oligo group by primer score')
     parser.add_argument('input_file', help='Path to input primer files')
     parser.add_argument('output_file', help='Path to output file')
+    parser.add_argument(
+    '--seed',
+    type=int,
+    default=None,
+    help='Random seed for reproducible sampling (default: None)')
+    parser.add_argument('--random', default="false", help='Whether to use random seed (true/false)')
+    parser.add_argument('--seed_text', help='Optional path to save the seed used')
+
     args = parser.parse_args()
+    use_random = args.random.lower() == "true"
 
     df = pd.read_csv(args.input_file, delim_whitespace=True, header=None, names=['Group', 'forward', 'reverse'])
     df = df[['Group', 'forward', 'reverse']]
     df['group_number'] = df['Group'].str.split('primerGroup').str[0]
 
+    # lowest_score_rows = df.groupby("group_number").apply(get_lowest_score).reset_index(drop=True)
+    # lowest_score_firstrow = df.groupby("group_number").apply(lambda x: get_lowest_score(x, return_first=True)).reset_index(drop=True)
+
+    # All tied lowest scores per group (non-random)
     lowest_score_rows = df.groupby("group_number").apply(get_lowest_score).reset_index(drop=True)
-    lowest_score_firstrow = df.groupby("group_number").apply(lambda x: get_lowest_score(x, return_first=True)).reset_index(drop=True)
+
+    # Always take the first among tied lowest score rows per group
+    lowest_score_firstrow = df.groupby("group_number").apply(
+        lambda x: get_lowest_score(x, return_first=True)
+    ).reset_index(drop=True)
+
+    # Deterministically pick one of the tied lowest-score rows per group using the same seed
+    if use_random and not args.seed:
+        args.seed = random.randint(0, 2**31 - 1)
+
+    if args.seed:
+        lowest_score_randomrow = df.groupby("group_number").apply(
+            lambda x: get_lowest_score(x, random_state=args.seed)
+        ).reset_index(drop=True)
 
     lowest_score_rows.to_csv(args.output_file, sep="\t", header=False, index=False)
 
     base, ext = os.path.splitext(args.output_file)
     new_output_file = f"{base}_firstrow{ext}"
     lowest_score_firstrow.to_csv(new_output_file, sep="\t", header=False, index=False)
+
+    if use_random:
+        new_output_randomrow_file = f"{base}_random_row{ext}"
+        lowest_score_randomrow.to_csv(new_output_randomrow_file, sep="\t", header=False, index=False)
+        if args.seed_text:
+            with open(args.seed_text, "a") as f:
+                f.write(f"Timestamp: {datetime.now().isoformat()}\n")
+                f.write(f"Seed used: {args.seed}\n\n")

@@ -11,11 +11,31 @@ process SNP_REDUNDANCY_FILTER {
     output:
     path 'concatenated_primers_snpfiltered.txt', emit: snp_filtered_good_primers, optional: true
     path 'concatenated_primers_final*.txt', emit: final_primers, optional: true
+    path "seed_used.txt", optional: true
 
     script:
     """
     snp_overlap_filter.py $primer3_files $candidate_primers concatenated_primers_snpfiltered.txt
-    run_primerscore.py concatenated_primers_snpfiltered.txt concatenated_primers_final.txt
+
+    if [[ "${params.random}" == "true" ]]; then
+        if [ "${params.seed}" = "null" ] || [ -z "${params.seed}" ]; then
+            echo "random option selected, but no seed provided."
+            run_primerscore.py concatenated_primers_snpfiltered.txt concatenated_primers_final.txt --random ${params.random} --seed_text seed_used.txt
+        elif expr "${params.seed}" + 0 >/dev/null 2>&1; then
+            echo "Running with seed = ${params.seed}"
+            run_primerscore.py concatenated_primers_snpfiltered.txt concatenated_primers_final.txt --seed ${params.seed} --random ${params.random} --seed_text seed_used.txt
+        else
+            echo "Error: --seed must be an integer if provided. Got '${params.seed}'"
+            exit 1
+        fi
+    else
+        echo "Random mode not enabled."
+        run_primerscore.py concatenated_primers_snpfiltered.txt concatenated_primers_final.txt
+    fi
+    
+
+
+   
 
     """
 }
