@@ -115,6 +115,7 @@ In the `primers` folder of the output directory, you will find 5 files represent
 - `concatenated_primers_snpfiltered.txt` — after SNP redundancy filtering  
 - `concatenated_primers_final.txt` — after primer-score filtering (retaining all lowest score primers in each orthogroup)  
 - `concatenated_primers_final_firstrow.txt` — after primer-score filtering (keeping only the first lowest score primer in each orthogroup)  
+- `concatenated_primers_final_random_row.txt` — after primer-score filtering (randomly select one of the lowest score primer in each orthogroup)  
 
 To summarize these files, run the following one-liner script inside the `primers` folder. It will output the **legacy primer match count**, **unique oligo group count**, and **total primer count** for each file—all on a single line per file:
 
