@@ -76,7 +76,11 @@ nextflow run main.nf \
    --number_isolates (the number of isolates to be included in an orthogroup) \
    --random (either true or false, randomly select a tied lowest score primer from each orthogroup) \
    --seed (an integer random seed, if not specified, a random integer will be used and saved in 'seed_used.txt')
-```
+```  
+
+**note:**  
+- if `random` is set to true without `seed` value given, a random integer will be used as the seed and it will be saved in `seed_used.txt` under `primers` folder.  
+- if a `seed` value is provided without `random` set to true, the pipeline will ignore it and finish without generating a lit of randomly selected tied lowest score primers from each orthogroup.  
 
 To quickly test the pipeline with the bundled example dataset, run the following command:
 
